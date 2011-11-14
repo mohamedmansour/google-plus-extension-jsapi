@@ -57,7 +57,7 @@ message as follows:
 A full blown example will be released by the end of this week showing how powerful this could be.
 As you already know, I am creating a simple circle management utility so you can manage your circles.
 
-API Specifications
+API Documentation
 ----
 
 AbstractEntity Members:
@@ -117,6 +117,12 @@ Read:
 - `void getPersonInMyCircles(String:googleProfileID, Function(PersonEntity):callback)`
 - `void getPeopleWhoAddedMe(Function(PersonEntity[]):callback)`
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
+
+
+Private Members (only for internal API):
+- `Object _parseJSON(String:input)` - Parses the Google Irregular JSON
+- `void _requestService(Function:callback, String:url, String:postData` - Sends an XHR request to Google Service
+- `String _getSession()`- Unique user session that authenticates to persist to your account.
 
 Watch this space!
 
