@@ -1,0 +1,16 @@
+{
+  "name": "Hello World",
+  "version": "0.0.1",
+  "description": "Google+ Unofficial API Demo.",
+  "icons": {
+    "16": "img/icon16.png",
+    "32": "img/icon32.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png"
+  },
+  "permissions": [ 
+    "unlimitedStorage", 
+    "https://plus.google.com/*"
+  ],
+  "background_page": "background.html"
+}
