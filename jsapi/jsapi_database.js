@@ -94,7 +94,12 @@ PersonEntity.prototype.tableDefinition = function() {
   };
 };
 
+/**
+ * Replace implementation with custom full joined implementation with all tables.
+ * @override
+ */
 PersonEntity.prototype.find = function(obj, callback) {
+  var self = this;
   this.db.readTransaction(function(tx) {
     var keys = [];
     var values = [];
@@ -142,9 +147,10 @@ PersonEntity.prototype.find = function(obj, callback) {
             }
           }
         }
-        callback({status: true, data: data});
+        self.fireCallback({status: true, data: data}, callback);
     }, function(tx, e) {
-        callback({status: false, data: e.message});
+        console.error(self.name, 'Find', e.message);
+        self.fireCallback({status: false, data: e.message}, callback);
     });
   });
 };
@@ -183,4 +189,30 @@ CircleEntity.prototype.tableDefinition = function() {
   };
 };
 
+/**
+ * Replace implementation with custom full joined implementation with all tables.
+ * @override
+ */
+CircleEntity.prototype.find = function(obj, callback) {
+  var self = this;
+  var where = this.getWhereObject(obj);
+  var sql = ' SELECT circle.id as id, circle.name as name, circle.position as position, circle.description as description, count(circle_id) as count ' +
+            ' FROM circle LEFT JOIN circle_person ON circle.id = circle_person.circle_id ' +
+            ' WHERE ' + where.keys.join(' AND ') +
+            ' GROUP BY id';
+ 
+  this.db.readTransaction(function(tx) {
+    tx.executeSql(sql, where.values, function (tx, rs) {
+        var data = [];
+        for (var i = 0; i < rs.rows.length; i++) {
+          data.push(rs.rows.item(i));
+        }
+        self.fireCallback({status: true, data: data}, callback);
+      }, function(tx, e) {
+        console.error(self.name, 'Find', e.message);
+        self.fireCallback({status: false, data: e.message}, callback);
+      }
+    );
+  });
+};
 // ---[ End Defining AbstractEntity ]-------------------------------------------------

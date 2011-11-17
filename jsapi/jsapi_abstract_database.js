@@ -91,6 +91,29 @@ AbstractEntity.prototype.fireCallback = function(obj, callback) {
 };
 
 /**
+ * Prepares the Where Clause for the entity.
+ *
+ * @param {Object} The query object.
+ */
+AbstractEntity.prototype.getWhereObject = function(obj) {
+  var keys = [];
+  var values = [];
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      keys.push(key + ' = ?');
+      values.push(obj[key]);
+    }
+  }
+  if (values.length == 0) {
+    keys.push('1 = 1');
+  }
+  return {
+    keys: keys,
+    values: values
+  }
+};
+
+/**
  * The entity name.
  *
  * @return {string} The name of the entity.
@@ -241,21 +264,12 @@ AbstractEntity.prototype.update = function(obj, callback) {
  */
 AbstractEntity.prototype.find = function(obj, callback) {
   var self = this;
-  var keys = [];
-  var values = [];
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      keys.push(key + ' = ?');
-      values.push(obj[key]);
-    }
-  }
-  if (values.length == 0) {
-    keys.push('1 = 1');
-  }
-  var sql = 'SELECT * FROM ' + this.name + ' WHERE ' + keys.join(' AND ');
+  var where = this.getWhereObject(obj);
+  var sql = 'SELECT * FROM ' + this.name + ' WHERE ' + where.keys.join(' AND ');
   this.log(sql);
+
   this.db.readTransaction(function(tx) {
-    tx.executeSql(sql, values, function (tx, rs) {
+    tx.executeSql(sql, where.values, function (tx, rs) {
         var data = [];
         for (var i = 0; i < rs.rows.length; i++) {
           data.push(rs.rows.item(i));
@@ -283,21 +297,13 @@ AbstractEntity.prototype.findAll = function(callback) {
  */
 AbstractEntity.prototype.count = function(obj, callback) {
   var self = this;
-  var keys = [];
-  var values = [];
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      keys.push(key + ' = ?');
-      values.push(obj[key]);
-    }
-  }
-  if (values.length == 0) {
-    keys.push('1 = 1');
-  }
-  var sql = 'SELECT count(*) as count FROM ' + this.name + ' WHERE ' + keys.join(' AND ');
+
+  var where = this.getWhereObject(obj);
+  var sql = 'SELECT count(*) as count FROM ' + this.name + ' WHERE ' + where.keys.join(' AND ');
   this.log(sql);
+
   this.db.readTransaction(function(tx) {
-    tx.executeSql(sql, values, function (tx, rs) {
+    tx.executeSql(sql, where.values, function (tx, rs) {
         var count = rs.rows.item(0).count;
         self.fireCallback({status: true, data: count}, callback);
       }, function(e) {
