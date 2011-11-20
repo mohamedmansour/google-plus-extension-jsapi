@@ -123,3 +123,25 @@ JSAPIHelper.assertEquals = function(expected, actual) {
     console.error(results, expected, actual);
   }
 };
+
+/**
+ * Encode stuff that only matter in the GAPI.
+ *
+ * @param {string} input The encoded string.
+ * @return {string} The decoded string.
+ */
+JSAPIHelper.decodeHTMLCodes = function(input) {
+  var htmlCodes = [
+   ['%5B', '['],
+   ['%22', '"'],
+   ['%5C', '\\'],
+   ['%20', ' '],
+   ['%2C', ','],
+   ['%5D', ']'],
+   ['%3A', ':']
+  ];
+  htmlCodes.forEach(function(element, index) {
+    input = input.replace(new RegExp(element[0], 'g'), element[1]);
+  });
+  return input;
+};
