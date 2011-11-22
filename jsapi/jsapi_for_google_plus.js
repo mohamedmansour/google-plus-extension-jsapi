@@ -634,17 +634,18 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
  *
  * @param {function(Object)} callback The response callback.
  * @param {string} query The textual query to search on.
- * @param {Object} opt_extra Optional type where values are 'best' or 'recent'
- *                           default is recent. Keys: type, precache
+ * @param {Object} opt_extra Optional extra params:
+ *                           category : 'best' | 'recent'
+ *                           precache : | 1+
  */
 GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   var self = this;
   var extra = opt_extra || {};
-  var type = extra.type == 'best' ? 1 : 2;
+  var category = extra.category == 'best' ? 1 : 2;
   var precache = extra.precache || 1;
   query = query.replace(/"/g, '\\"'); // Escape only quotes for now.
   
-  var data = 'srchrp=[["' + query + '",1,' + type + ',[1]]$SESSION_ID]&at=' + this._getSession();
+  var data = 'srchrp=[["' + query + '",1,' + category + ',[1]]$SESSION_ID]&at=' + this._getSession();
   var processedData = data.replace('$SESSION_ID', '');
   
   var doRequest = function(searchResults) {
@@ -698,7 +699,11 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
             }
           });
         }
-        searchResults.push(item);
+        
+        // Only add for the specific type.
+        if (!extra.type || extra.type == item.type) {
+          searchResults.push(item);
+        }
       });
       
       // Page the results.
