@@ -189,7 +189,6 @@ GooglePlusAPI.prototype._getSession = function() {
     var remainingText = xhr.responseText.substring(startIndex + searchForString.length);
     this._session = remainingText.substring(0, remainingText.indexOf('"'));
   }
-  console.log(this._session);
   return this._session;
 };
 
