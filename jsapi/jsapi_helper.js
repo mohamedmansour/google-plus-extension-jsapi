@@ -37,6 +37,13 @@ JSAPIHelper.prototype.test = function() {
 };
 
 /**
+ * Is a given value a string?
+ */
+JSAPIHelper.isString = function(obj) {
+  return !!(obj === '' || (obj && obj.charCodeAt && obj.substr));
+};
+
+/**
  * Checks if the item is indeed an Array.
  *
  * @param {*} obj Any item.
