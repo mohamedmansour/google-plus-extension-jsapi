@@ -5,6 +5,16 @@ It has been 4 months since we have seen any Circle/Posts/Followers
 Write/Read API for Google+. Since Google+ is by nature asynchronous
 we could tap into their XHR calls and imitate the requests.
 
+Who uses this API:
+----
+
+![](https://github.com/mohamedmansour/my-hangouts-extension/raw/master/img/icon32.png) My Hangouts Chrome Extension https://plus.google.com/116935358560979346551/about
+
+![](https://github.com/mohamedmansour/circle-management-extension/raw/master/img/icon32.png) Circle Management Chrome Extension https://plus.google.com/100283465826629314254/about
+
+What is it about:
+----
+
 I provide you a very basic asynchronous Google+ API, in the current
 release, you can do the following:
 
@@ -15,6 +25,7 @@ release, you can do the following:
 This is a fully read and write API.
 
 Native Examples:
+----
 
     // Create an instance of the API.
     var plus = new GooglePlusAPI();
@@ -117,6 +128,7 @@ Read:
 - `void getPersonInMyCircles(String:googleProfileID, Function(PersonEntity):callback)`
 - `void getPeopleWhoAddedMe(Function(PersonEntity[]):callback)`
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
+- `void search(Function(data):callback, String:query, Object:type)`
 
 
 Private Members (only for internal API):
