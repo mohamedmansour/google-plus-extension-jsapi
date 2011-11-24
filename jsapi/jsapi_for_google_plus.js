@@ -748,10 +748,11 @@ GooglePlusAPI.prototype.getCircle = function(id, callback) {
 };
 
 /**
+ * @param {Object} obj The search object.
  * @param {function(Object)} callback All the circles.
  */
-GooglePlusAPI.prototype.getPeople = function(callback) {
-  this._db.getPersonEntity().eagerFind({}, callback);
+GooglePlusAPI.prototype.getPeople = function(obj, callback) {
+  this._db.getPersonEntity().find(obj, callback);
 };
 
 /**

@@ -122,7 +122,7 @@ Read:
 - `void getInfo(Function({id, name, email, acl}:callback)`
 - `void getCircles(Function(CircleEntity[]):callback)`
 - `void getCircle(Function(String:circleID, CircleEntity):callback)`
-- `void getPeople(Function(PersonEntity[]):callback)`
+- `void getPeople(Object:obj, Function(PersonEntity[]):callback)`
 - `void getPerson(Function(String:googleProfileID, PersonEntity):callback)`
 - `void getPeopleInMyCircles(Function(PersonEntity[]):callback)`
 - `void getPersonInMyCircles(String:googleProfileID, Function(PersonEntity):callback)`
