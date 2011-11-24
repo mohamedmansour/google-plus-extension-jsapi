@@ -247,9 +247,12 @@ GooglePlusAPI.prototype.init = function(callback) {
 
 /**
  * Invalidate the circles and people in my circles cache and rebuild it.
+ *
+ * @param {boolean} opt_onlyCircles Optional parameter to just persist circle
  */
-GooglePlusAPI.prototype.refreshCircles = function(callback) {
+GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
   var self = this;
+  var onlyCircles = opt_onlyCircles || false;
   this._requestService(function(response) {
     var dirtyCircles = response[1];
     self._db.getCircleEntity().clear(function(res) {
@@ -271,7 +274,7 @@ GooglePlusAPI.prototype.refreshCircles = function(callback) {
         var batchNames = ['CircleEntity', 'PeopleEntity', 'PersonCircleEntity'];
 
         // Counter till we are done.
-        var remaining = batchRemaining[0] + batchRemaining[1];
+        var remaining = onlyCircles ? batchRemaining[0] : batchRemaining[0] + batchRemaining[1];
         var onComplete = function(result) {
           if (--remaining == 0) {
             self._fireCallback(callback, true);
@@ -302,29 +305,32 @@ GooglePlusAPI.prototype.refreshCircles = function(callback) {
           });
         });
 
-        // Persist People in your circles. Count number of total circles as well.
-        dirtyUsers.forEach(function(element, index) {
-          var userTuple = self._parseUser(element, true);
-          var user = userTuple[0];
-          user.in_my_circle = 'Y';
-          var userCircles = userTuple[1];
-          remaining += userCircles.length;
-          batchRemaining[2] += userCircles.length;
-          onRecord(1, user);
-        });
+        // Skip since we require only circle.
+        if (!onlyCircles) {
+          // Persist People in your circles. Count number of total circles as well.
+          dirtyUsers.forEach(function(element, index) {
+            var userTuple = self._parseUser(element, true);
+            var user = userTuple[0];
+            user.in_my_circle = 'Y';
+            var userCircles = userTuple[1];
+            remaining += userCircles.length;
+            batchRemaining[2] += userCircles.length;
+            onRecord(1, user);
+          });
 
-        // For each person, persist them in their circles.
-        dirtyUsers.forEach(function(element, index) {
-          var userTuple = self._parseUser(element, true);
-          var user = userTuple[0];
-          var userCircles = userTuple[1];
-          userCircles.forEach(function(element, index) {
-            onRecord(2, {
-              circle_id: element,
-              person_id: user.id
+          // For each person, persist them in their circles.
+          dirtyUsers.forEach(function(element, index) {
+            var userTuple = self._parseUser(element, true);
+            var user = userTuple[0];
+            var userCircles = userTuple[1];
+            userCircles.forEach(function(element, index) {
+              onRecord(2, {
+                circle_id: element,
+                person_id: user.id
+              });
             });
           });
-        });
+        }
       }
     });
   }, this.CIRCLE_API);

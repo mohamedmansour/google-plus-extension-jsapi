@@ -101,7 +101,7 @@ Native querying:
 Initialization, fill up the database: 
 
 - `void init(Function:doneCallback)` - Initializes session and data, you can call it at app start.
-- `void refreshCircles(Function:doneCallback)` - Queries G+ Service for all circles and people information.
+- `void refreshCircles(Function:doneCallback, boolean:opt_onlyCircles)` - Queries G+ Service for all circles and people information.
 - `void refreshFollowers(Function:doneCallback)` - Queries G+ Service for everyone who is following me.
 - `void refreshFindPeople(Function:doneCallback)` - Queries G+ Services for discovering similar people like me.
 - `void refreshInfo(Function:doneCallback)` - Refresh my information. Rarely used.
