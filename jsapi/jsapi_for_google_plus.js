@@ -228,6 +228,16 @@ GooglePlusAPI.prototype._buildProfileURLFromItem = function(url) {
   return url;
 };
 
+/**
+ * Fix the image since some are corrupted with no https.
+ */
+GooglePlusAPI.prototype._fixImage = function(image) {
+  if (image.indexOf('https') == -1) {
+    image = 'https:' + image;
+  }
+  return image;
+};
+
 //----------------------- Public Functions ------------------------.
 
 /**
@@ -670,13 +680,13 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         item.owner = {};
         item.owner.name = element[3];
         item.owner.id = element[16];
-        item.owner.image = element[18];
+        item.owner.image = self._fixImage(element[18]);
 
         if (element[43]) { // Share?
           item.share = {};
           item.share.name = element[43][0];
           item.share.id = element[43][1];
-          item.share.image = element[43][4];
+          item.share.image = self._fixImage(element[43][4]);
           item.share.html = element[43][4];
           item.share.url = self._buildProfileURLFromItem(element[43][4]);
           item.html = element[47];
