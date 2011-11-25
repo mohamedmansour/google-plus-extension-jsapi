@@ -665,6 +665,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         item.type = element[2].toLowerCase();
         item.time = element[30];
         item.url = self._buildProfileURLFromItem(element[21]);
+        item.public =  element[32] == '1';
         
         item.owner = {};
         item.owner.name = element[3];
