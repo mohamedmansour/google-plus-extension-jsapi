@@ -28,7 +28,7 @@ AbstractEntity.prototype.initialize = function(callback) {
   var obj = this.tableDefinition();
   var sql = [];
   var indexes = [];
-  sql.push('id TEXT PRIMARY KEY');
+  sql.push('_id INTEGER PRIMARY KEY AUTOINCREMENT');
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
       var val = obj[key];
@@ -49,7 +49,7 @@ AbstractEntity.prototype.initialize = function(callback) {
     }
   }
   sql = sql.concat(indexes);
-  sql.push('UNIQUE (id)');
+  sql.push('UNIQUE (_id)');
   this.db.transaction(function(tx) {
     tx.executeSql('CREATE TABLE IF NOT EXISTS ' + self.name + '(' + sql.join(',') + ')', [],
       function(tx, rs) {

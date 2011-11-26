@@ -82,6 +82,7 @@ JSAPIHelper.inherits(PersonEntity, AbstractEntity);
 
 PersonEntity.prototype.tableDefinition = function() {
   return {
+    id: 'TEXT NOT NULL',
     email: 'TEXT',
     name: 'TEXT NOT NULL',
     photo: 'TEXT',
@@ -90,7 +91,10 @@ PersonEntity.prototype.tableDefinition = function() {
     occupation: 'TEXT',
     score: 'REAL',
     in_my_circle: 'CHAR DEFAULT "N"',
-    added_me: 'CHAR DEFAULT "N"'
+    added_me: 'CHAR DEFAULT "N"',
+    unique: [
+      ['id']
+    ]
   };
 };
 
@@ -183,9 +187,13 @@ JSAPIHelper.inherits(CircleEntity, AbstractEntity);
 
 CircleEntity.prototype.tableDefinition = function() {
   return {
+    id: 'TEXT NOT NULL',
     name: 'TEXT NOT NULL',
     position: 'TEXT',
-    description: 'TEXT'
+    description: 'TEXT',
+    unique: [
+      ['id']
+    ]
   };
 };
 
