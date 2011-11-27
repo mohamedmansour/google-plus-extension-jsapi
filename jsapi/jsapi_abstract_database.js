@@ -194,7 +194,7 @@ AbstractEntity.prototype.create = function(obj, callback) {
  */
 AbstractEntity.prototype.destroy = function(id, callback) {
   var self = this;
-  var sql = 'DELETE FROM ' + this.name + ' WHERE id = ?';
+  var sql = 'DELETE FROM ' + this.name + ' WHERE _id = ?';
   this.log(sql, id);
   this.db.transaction(function(tx) {
     tx.executeSql(sql, [id], function(tx, rs) {
@@ -232,7 +232,7 @@ AbstractEntity.prototype.update = function(obj, callback) {
       for (var key in element) {
         if (element.hasOwnProperty(key)) {
           keyCount++;
-          if (key != 'id') {
+          if (key != '_id') {
             update.push(key + ' = ?')
             data.push(element[key]);
           }
