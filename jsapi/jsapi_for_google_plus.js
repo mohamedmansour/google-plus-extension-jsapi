@@ -296,7 +296,6 @@ GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
           batchInserts[type].push(data);
           if (batchCounter[type] % 1000 == 0 || batchCounter[type] == batchRemaining[type]) {
             batchEntity[type].create(batchInserts[type], onComplete);
-            console.log('Persisting ' + batchNames[type], batchInserts[type].length);
             batchInserts[type] = [];
           }
         };
@@ -368,7 +367,6 @@ GooglePlusAPI.prototype.refreshFollowers = function(callback) {
       batchInserts.push(user);
       if (batchCounter % 1000 == 0 || batchCounter == remaining) {
         entity.create(batchInserts, onComplete);
-        console.log('Persisting Followers', batchInserts.length);
         batchInserts = [];
       }
     };
@@ -405,7 +403,6 @@ GooglePlusAPI.prototype.refreshFindPeople = function(callback) {
       batchInserts.push(user);
       if (batchCounter % 1000 == 0 || batchCounter == remaining) {
         entity.create(batchInserts, onComplete);
-        console.log('Persisting Find People', batchInserts.length);
         batchInserts = [];
       }
     };
@@ -666,70 +663,81 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   
   var doRequest = function(searchResults) {
     self._requestService(function(response) {
-      var streamID = response[1][1][2]; // Not Used.
-      var trends = response[1][3][0]; // Not Used.
-      var dirtySearchResults = response[1][1][0][0];
-      processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
-      dirtySearchResults.forEach(function(element, index) {
-        var item = {};
-        item.type = element[2].toLowerCase();
-        item.time = element[30];
-        item.url = self._buildProfileURLFromItem(element[21]);
-        item.public =  element[32] == '1';
-        
-        item.owner = {};
-        item.owner.name = element[3];
-        item.owner.id = element[16];
-        item.owner.image = self._fixImage(element[18]);
+      var errorExists = response[1][1];
+      if (!errorExists) {
+        self._fireCallback(callback, {
+          status: false,
+          data: searchResults
+        });
+      } else {
+        var streamID = response[1][1][2]; // Not Used.
+        var trends = response[1][3][0]; // Not Used.
+        var dirtySearchResults = response[1][1][0][0];
+        processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
+        dirtySearchResults.forEach(function(element, index) {
+          var item = {};
+          item.type = element[2].toLowerCase();
+          item.time = element[30];
+          item.url = self._buildProfileURLFromItem(element[21]);
+          item.public =  element[32] == '1';
+          
+          item.owner = {};
+          item.owner.name = element[3];
+          item.owner.id = element[16];
+          item.owner.image = self._fixImage(element[18]);
 
-        if (element[43]) { // Share?
-          item.share = {};
-          item.share.name = element[43][0];
-          item.share.id = element[43][1];
-          item.share.image = self._fixImage(element[43][4]);
-          item.share.html = element[43][4];
-          item.share.url = self._buildProfileURLFromItem(element[43][4]);
-          item.html = element[47];
-        }
-        else { // Normal
-          item.html = element[4];
-        }
+          if (element[43]) { // Share?
+            item.share = {};
+            item.share.name = element[43][0];
+            item.share.id = element[43][1];
+            item.share.image = self._fixImage(element[43][4]);
+            item.share.html = element[43][4];
+            item.share.url = self._buildProfileURLFromItem(element[43][4]);
+            item.html = element[47];
+          }
+          else { // Normal
+            item.html = element[4];
+          }
 
-        // Parse hangout item.
-        if (element[2] == 'Hangout') {
-          item.data = {};
-          item.data.active = element[82][2][1][0][1] == '' ? false : true;
-          item.data.id = element[82][2][1][0][0];
-          item.data.participants = [];
-          var cachedOnlineUsers = {};
-          var onlineParticipants = element[82][2][1][0][3];
-          onlineParticipants.forEach(function(elt, index) {
-            var user = self._buildUserFromItem(elt[2], elt[0], elt[1], true);
-            cachedOnlineUsers[user.id] = true;
-            item.data.participants.push(user);
-          });
-          var offlineParticipants = element[82][2][1][0][4];
-          offlineParticipants.forEach(function(elt, index) {
-            var user = self._buildUserFromItem(elt[2], elt[0], elt[1], false);
-            if (!cachedOnlineUsers[user.id]) {
+          // Parse hangout item.
+          if (element[2] == 'Hangout') {
+            item.data = {};
+            item.data.active = element[82][2][1][0][1] == '' ? false : true;
+            item.data.id = element[82][2][1][0][0];
+            item.data.participants = [];
+            var cachedOnlineUsers = {};
+            var onlineParticipants = element[82][2][1][0][3];
+            onlineParticipants.forEach(function(elt, index) {
+              var user = self._buildUserFromItem(elt[2], elt[0], elt[1], true);
+              cachedOnlineUsers[user.id] = true;
               item.data.participants.push(user);
-            }
+            });
+            var offlineParticipants = element[82][2][1][0][4];
+            offlineParticipants.forEach(function(elt, index) {
+              var user = self._buildUserFromItem(elt[2], elt[0], elt[1], false);
+              if (!cachedOnlineUsers[user.id]) {
+                item.data.participants.push(user);
+              }
+            });
+          }
+          
+          // Only add for the specific type.
+          if (!extra.type || extra.type == item.type) {
+            searchResults.push(item);
+          }
+        });
+        
+        // Page the results.
+        if (precache > 1) {
+          precache--;
+          doRequest(searchResults); // Recurse till we are done paging.
+        }
+        else {
+          self._fireCallback(callback, {
+            status: true,
+            data: searchResults
           });
         }
-        
-        // Only add for the specific type.
-        if (!extra.type || extra.type == item.type) {
-          searchResults.push(item);
-        }
-      });
-      
-      // Page the results.
-      if (precache > 1) {
-        precache--;
-        doRequest(searchResults); // Recurse till we are done paging.
-      }
-      else {
-        self._fireCallback(callback, searchResults);
       }
     }, self.QUERY_API, processedData);
   };
