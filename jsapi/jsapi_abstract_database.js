@@ -262,10 +262,12 @@ AbstractEntity.prototype.update = function(obj, callback) {
  *
  * @param {function(!Object)} callback The listener to call when completed.
  */
-AbstractEntity.prototype.find = function(obj, callback) {
+AbstractEntity.prototype.find = function(select, where, callback) {
   var self = this;
-  var where = this.getWhereObject(obj);
-  var sql = 'SELECT * FROM ' + this.name + ' WHERE ' + where.keys.join(' AND ');
+  var select = JSAPIHelper.isArray(select) ? select : ['*'];
+  var where = this.getWhereObject(where);
+  var sql = 'SELECT ' + select.join(',') + ' FROM ' + this.name +
+            ' WHERE ' + where.keys.join(' AND ');
   this.log(sql);
 
   this.db.readTransaction(function(tx) {
@@ -288,7 +290,7 @@ AbstractEntity.prototype.find = function(obj, callback) {
  * @param {function(!Object)} callback The listener to call when completed.
  */
 AbstractEntity.prototype.findAll = function(callback) {
-  this.find({}, callback);
+  this.find([], {}, callback);
 };
 
 /**

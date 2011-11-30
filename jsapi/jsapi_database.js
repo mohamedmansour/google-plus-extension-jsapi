@@ -102,28 +102,17 @@ PersonEntity.prototype.tableDefinition = function() {
  * Replace implementation with custom full joined implementation with all tables.
  * @override
  */
-PersonEntity.prototype.find = function(obj, callback) {
+PersonEntity.prototype.find = function(select, where, callback) {
   var self = this;
+  var where = this.getWhereObject(where);
+  var sql = 'SELECT person.id as id, person.email as email, person.name as name, person.photo as photo, ' +
+      'person.location as location, person.employment as employment, person.occupation as occupation, ' +
+      'person.score as score, person.in_my_circle as in_my_circle, person.added_me as added_me, ' +
+      'circle.id as circle_id, circle.description as circle_description, circle.name as circle_name ' +
+      'FROM person LEFT JOIN circle_person ON person.id = circle_person.person_id LEFT JOIN circle ON circle.id = circle_person.circle_id WHERE ' +
+      where.keys.join(' AND ');
   this.db.readTransaction(function(tx) {
-    var keys = [];
-    var values = [];
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        keys.push(key + ' = ?');
-        values.push(obj[key]);
-      }
-    }
-    if (values.length == 0) {
-      keys.push('1 = 1');
-    }
-
-    var sql = 'SELECT person.id as id, person.email as email, person.name as name, person.photo as photo, ' +
-        'person.location as location, person.employment as employment, person.occupation as occupation, ' +
-        'person.score as score, person.in_my_circle as in_my_circle, person.added_me as added_me, ' +
-        'circle.id as circle_id, circle.description as circle_description, circle.name as circle_name ' +
-        'FROM person LEFT JOIN circle_person ON person.id = circle_person.person_id LEFT JOIN circle ON circle.id = circle_person.circle_id WHERE ' +
-        keys.join(' AND ');
-    tx.executeSql(sql, values, function (tx, rs) {
+    tx.executeSql(sql, where.values, function (tx, rs) {
         var data = [];
         var prevID = null;
         for (var i = 0; i < rs.rows.length; i++) {
@@ -201,9 +190,9 @@ CircleEntity.prototype.tableDefinition = function() {
  * Replace implementation with custom full joined implementation with all tables.
  * @override
  */
-CircleEntity.prototype.find = function(obj, callback) {
+CircleEntity.prototype.find = function(select, where, callback) {
   var self = this;
-  var where = this.getWhereObject(obj);
+  var where = this.getWhereObject(where);
   var sql = ' SELECT circle.id as id, circle.name as name, circle.position as position, circle.description as description, count(circle_id) as count ' +
             ' FROM circle LEFT JOIN circle_person ON circle.id = circle_person.circle_id ' +
             ' WHERE ' + where.keys.join(' AND ') +

@@ -761,7 +761,7 @@ GooglePlusAPI.prototype.getInfo = function() {
  * @param {function(Object)} callback All the circles.
  */
 GooglePlusAPI.prototype.getCircles = function(callback) {
-  this._db.getCircleEntity().find({}, callback);
+  this._db.getCircleEntity().find([], {}, callback);
 };
 
 /**
@@ -769,7 +769,7 @@ GooglePlusAPI.prototype.getCircles = function(callback) {
  * @param {function(Object)} callback All the circles.
  */
 GooglePlusAPI.prototype.getCircle = function(id, callback) {
-  this._db.getCircleEntity().find({id: id}, callback);
+  this._db.getCircleEntity().find([], {id: id}, callback);
 };
 
 /**
@@ -777,7 +777,7 @@ GooglePlusAPI.prototype.getCircle = function(id, callback) {
  * @param {function(Object)} callback All the circles.
  */
 GooglePlusAPI.prototype.getPeople = function(obj, callback) {
-  this._db.getPersonEntity().find(obj, callback);
+  this._db.getPersonEntity().find([], obj, callback);
 };
 
 /**
@@ -785,14 +785,14 @@ GooglePlusAPI.prototype.getPeople = function(obj, callback) {
  * @param {function(Object)} callback The person involved.
  */
 GooglePlusAPI.prototype.getPerson = function(id, callback) {
-  this._db.getPersonEntity().find({id: id}, callback);
+  this._db.getPersonEntity().find([], {id: id}, callback);
 };
 
 /**
  * @param {function(Object)} callback People in my circles.
  */
 GooglePlusAPI.prototype.getPeopleInMyCircles = function(callback) {
-  this._db.getPersonEntity().find({in_my_circle: 'Y'}, callback);
+  this._db.getPersonEntity().find([], {in_my_circle: 'Y'}, callback);
 };
 
 /**
@@ -800,14 +800,14 @@ GooglePlusAPI.prototype.getPeopleInMyCircles = function(callback) {
  * @param {function(Object)} callback The person in my circle.
  */
 GooglePlusAPI.prototype.getPersonInMyCircle = function(id, callback) {
-  this._db.getPersonEntity().find({in_my_circle: 'Y', id: id}, callback);
+  this._db.getPersonEntity().find([], {in_my_circle: 'Y', id: id}, callback);
 };
 
 /**
  * @param {function(Object)} callback The people who added me.
  */
 GooglePlusAPI.prototype.getPeopleWhoAddedMe = function(callback) {
-  this._db.getPersonEntity().find({added_me: 'Y'}, callback);
+  this._db.getPersonEntity().find([], {added_me: 'Y'}, callback);
 };
 
 /**
@@ -815,5 +815,5 @@ GooglePlusAPI.prototype.getPeopleWhoAddedMe = function(callback) {
  * @param {function(Object)} callback The person who added me.
  */
 GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
-  this._db.getPersonEntity().find({added_me: 'Y', id: id}, callback);
+  this._db.getPersonEntity().find([], {added_me: 'Y', id: id}, callback);
 };
