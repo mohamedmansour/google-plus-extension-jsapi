@@ -663,7 +663,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   
   var doRequest = function(searchResults) {
     self._requestService(function(response) {
-      var errorExists = response[1][1];
+      var errorExists = response[1];
       if (!errorExists) {
         self._fireCallback(callback, {
           status: false,
