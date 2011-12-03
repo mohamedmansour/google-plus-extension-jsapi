@@ -87,8 +87,9 @@ GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
     }
     else {
       var text = data.responseText;
-      var results = data.responseText.substring(4);
-      callback(self._parseJSON(results));
+      var uglyResults = data.responseText.substring(4);
+      var results = self._parseJSON(uglyResults);
+      callback(JSAPIHelper.isArray(results) ? results[0] : results);
     }
   };
   var xhr = $.ajax({
