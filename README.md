@@ -128,7 +128,7 @@ Read:
 - `void getPersonInMyCircles(String:googleProfileID, Function(PersonEntity):callback)`
 - `void getPeopleWhoAddedMe(Function(PersonEntity[]):callback)`
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
-- `void search(Function(data):callback, String:query, Object:type)`
+- `void search(Function(data):callback, String:query, Object:{category, precache, burst, burst_size})`
 
 
 Private Members (only for internal API):

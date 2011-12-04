@@ -22,7 +22,7 @@ GooglePlusAPI = function() {
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
 
-  this.QUERY_API               = 'https://plus.google.com/u/0/_/s/query';
+  this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
   
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -651,12 +651,17 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
  * @param {Object} opt_extra Optional extra params:
  *                           category : 'best' | 'recent'
  *                           precache : | 1+
+ *                           burst    : false
+ *                           burst_size    : 8
  */
 GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   var self = this;
   var extra = opt_extra || {};
   var category = extra.category == 'best' ? 1 : 2;
   var precache = extra.precache || 1;
+  var burst = extra.burst || false;
+  var burst_size = extra.burst_size || 8;
+  var type = 'query';
   query = query.replace(/"/g, '\\"'); // Escape only quotes for now.
   
   var data = 'srchrp=[["' + query + '",1,' + category + ',[1]]$SESSION_ID]&at=' + this._getSession();
@@ -672,7 +677,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         });
       } else {
         var streamID = response[1][1][2]; // Not Used.
-        var trends = response[1][3][0]; // Not Used.
+        var trends = response[1][3]; // Not Used.
         var dirtySearchResults = response[1][1][0][0];
         processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
         dirtySearchResults.forEach(function(element, index) {
@@ -736,11 +741,21 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         else {
           self._fireCallback(callback, {
             status: true,
-            data: searchResults
+            data: searchResults,
+            type: type
           });
+          // Decide whether to do bursts or not.
+          if (burst) {
+            type = 'rt';
+            if (--burst_size > 0) {
+              setTimeout(function() {
+                doRequest([]);
+              }.bind(this), 2000);
+            }
+          }
         }
       }
-    }, self.QUERY_API, processedData);
+    }, self.QUERY_API + type, processedData);
   };
   
   var searchResults = [];
