@@ -129,6 +129,7 @@ Read:
 - `void getPeopleWhoAddedMe(Function(PersonEntity[]):callback)`
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
 - `void search(Function(data):callback, String:query, Object:{category, precache, burst, burst_size})`
+- `void lookupUser(Function(data):callback, String:googleProfileID)`
 
 
 Private Members (only for internal API):
