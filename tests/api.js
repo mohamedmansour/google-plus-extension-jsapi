@@ -1,8 +1,8 @@
 $(document).ready(function() {
   var plus = new GooglePlusAPI();
-  
+
   module('module');
-  
+
   test('Setup', function() {
     expect(1);
     stop(2000);
@@ -11,7 +11,7 @@ $(document).ready(function() {
       start();
     });
   });
-  
+
   test('Init Plus Api', function() {
     expect(1);
     stop(2000);
@@ -20,7 +20,7 @@ $(document).ready(function() {
       start();
     });
   });
-  
+
   test('Fetch just circles', function() {
     expect(4);
     stop(5000);
@@ -41,5 +41,15 @@ $(document).ready(function() {
         done();
       });
     }, true);
+  });
+
+  test('Lookup User Info', function() {
+    expect(2);
+    stop(2000);
+    plus.lookupUser(function(data) {
+      equals(data.user.name, 'Mohamed Mansour', 'My name');
+      ok(data.circles.length > 0, 'Circle exists');
+      start();
+    }, '116805285176805120365', true);
   });
 });

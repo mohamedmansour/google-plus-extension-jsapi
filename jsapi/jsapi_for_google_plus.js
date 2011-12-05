@@ -16,13 +16,11 @@ GooglePlusAPI = function() {
   this.PROPERTIES_MUTATE_API   = 'https://plus.google.com/u/0/_/socialgraph/mutate/properties/';
   this.DELETE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/delete/';
   this.SORT_MUTATE_API         = 'https://plus.google.com/u/0/_/socialgraph/mutate/sortorder/';
-
   this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
-
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
-
   this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
+  this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
   
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -143,9 +141,11 @@ GooglePlusAPI.prototype._parseUser = function(element, extractCircles) {
     dirtyCircles.forEach(function(element, index) {
       cleanCircles.push(element[2][0]);
     });
+    return [user, cleanCircles];
   }
-
-  return [user, cleanCircles];
+  else {
+    return user;
+  }
 };
 
 /**
@@ -374,8 +374,7 @@ GooglePlusAPI.prototype.refreshFollowers = function(callback) {
 
     var personEntity = self._db.getPersonEntity();
     dirtyFollowers.forEach(function(element, index) {
-      var userTuple = self._parseUser(element);
-      var user = userTuple[0];
+      var user = self._parseUser(element);
       user.added_me = 'Y';
       onRecord(personEntity, user);
     });
@@ -408,10 +407,9 @@ GooglePlusAPI.prototype.refreshFindPeople = function(callback) {
       }
     };
 
-    var personEntity =self._db.getPersonEntity();
+    var personEntity = self._db.getPersonEntity();
     dirtyUsers.forEach(function(element, index) {
-      var userTuple = self._parseUser(element[0]);
-      var user = userTuple[0];
+      var user = self._parseUser(element[0]);
       onRecord(personEntity, user);
     });
   }, this.FIND_PEOPLE_API);
@@ -472,8 +470,7 @@ GooglePlusAPI.prototype.addPeople = function(callback, circle, users) {
       }
     };
     dirtyPeople.forEach(function(element, index) {
-      userTuple = self._parseUser(element);
-      var user = userTuple[0];
+      var user = self._parseUser(element);
       user.in_my_circle = 'Y';
       self._db.getPersonEntity().create(user, function(result) {
         self._db.getPersonCircleEntity().create({
@@ -614,6 +611,26 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
     };
     self._fireCallback(callback, obj);
   }, this.PROFILE_GET_API + id);
+};
+
+/**
+ * Lookups the information, user and circle data for a specific
+ * user. The circle data is basically just the circle ID.
+ *
+ * @param {function(boolean)} callback
+ * @param {string} id The profile ID
+ */
+GooglePlusAPI.prototype.lookupUser = function(callback, id) {
+  var self = this;
+  var params = '?n=6&m=[[[null,null,"' + id + '"]]]';
+  var data = 'at=' + this._getSession();
+  this._requestService(function(response) {
+    var userObj = self._parseUser(response[1][0][1], true);
+    self._fireCallback(callback, {
+      user: userObj[0],
+      circles: userObj[1]
+    });
+  }, this.LOOKUP_API + params, data);
 };
 
 /**
