@@ -51,11 +51,11 @@ AbstractEntity.prototype.initialize = function(callback) {
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
       var val = obj[key];
-      if (_.isString(val)) {
+      if (JSAPIHelper.isString(val)) {
         sql.push(key + ' ' + val);
       }
       else if (key == 'unique') {
-          _.each(val, function(uniqueItem) {
+          val.forEach(function(uniqueItem, index) {
             sql.push('UNIQUE (' + uniqueItem.join(', ') + ')');
           });
       }
@@ -175,7 +175,7 @@ AbstractEntity.prototype.clear = function(callback) {
  */
 AbstractEntity.prototype.create = function(obj, callback) {
   var self = this;
-  if (!_.isArray(obj)) {
+  if (!JSAPIHelper.isArray(obj)) {
     obj = [obj];
   }
   this.db.transaction(function(tx) {
@@ -232,7 +232,7 @@ AbstractEntity.prototype.destroy = function(id, callback) {
  */
 AbstractEntity.prototype.update = function(obj, callback) {
   var self = this;
-  if (!_.isArray(obj)) {
+  if (!JSAPIHelper.isArray(obj)) {
     obj = [obj];
   }
 

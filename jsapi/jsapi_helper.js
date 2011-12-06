@@ -50,10 +50,10 @@ JSAPIHelper.isString = function(obj) {
  * return {boolean} True if the object is an array, otherwise false.
  */
 JSAPIHelper.isArray = function(obj) {
-    if (!obj) {
-        return false;
-    }
-    return obj.constructor == Array;
+  if (!obj) {
+    return false;
+  }
+  return obj.constructor == Array;
 };
 
 /**
@@ -72,22 +72,22 @@ JSAPIHelper.isArray = function(obj) {
  *                                   false if not found.
  */
 JSAPIHelper.searchArray = function(needle, haystack) {
-    if (!JSAPIHelper.isArray(haystack)) {
-        return false;
-    }
-    for (var i = 0; i < haystack.length; i++) {
-        var currentValue = haystack[i];
-        if (JSAPIHelper.isArray(currentValue)) {
-          path = JSAPIHelper.searchArray(needle, currentValue);
-          if (path) {
-            return [i].concat(path);
-          }
-        }
-        if (currentValue == needle) {
-          return [i];
-        }
-    }
+  if (!JSAPIHelper.isArray(haystack)) {
     return false;
+  }
+  for (var i = 0; i < haystack.length; i++) {
+    var currentValue = haystack[i];
+    if (JSAPIHelper.isArray(currentValue)) {
+      path = JSAPIHelper.searchArray(needle, currentValue);
+      if (path) {
+        return [i].concat(path);
+      }
+    }
+    if (currentValue == needle) {
+      return [i];
+    }
+  }
+  return false;
 };
 
 /**
