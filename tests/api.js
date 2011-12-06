@@ -52,4 +52,18 @@ $(document).ready(function() {
       start();
     }, '116805285176805120365', true);
   });
+
+  test('Current User Info', function() {
+    expect(6);
+    stop(2000);
+    plus.refreshInfo(function(res) {
+      ok(res.status, 'Info received');
+      ok(res.data.acl.indexOf('"{\\"aclEntries\\":[{\\"') == 0, 'Access Control List exists');
+      ok(res.data.circles.length > 0, 'Circle exists');
+      ok(res.data.id.match(/\d+/), 'User id valid');
+      ok(res.data.full_email.indexOf(res.data.email) > 0, 'Email exists');
+      equals(plus.getInfo().acl, res.data.acl, 'ACL are the same');
+      start();
+    }, '116805285176805120365', true);
+  });
 });

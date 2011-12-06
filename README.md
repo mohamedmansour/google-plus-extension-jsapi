@@ -104,7 +104,7 @@ Initialization, fill up the database:
 - `void refreshCircles(Function:doneCallback, boolean:opt_onlyCircles)` - Queries G+ Service for all circles and people information.
 - `void refreshFollowers(Function:doneCallback)` - Queries G+ Service for everyone who is following me.
 - `void refreshFindPeople(Function:doneCallback)` - Queries G+ Services for discovering similar people like me.
-- `void refreshInfo(Function:doneCallback)` - Refresh my information. Rarely used.
+- `void refreshInfo(Function:doneCallback(data))` - Refresh my information. Rarely used.
 
 Persistence:
 

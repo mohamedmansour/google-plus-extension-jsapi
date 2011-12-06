@@ -429,19 +429,25 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
   var self = this;
   this._requestService(function(response) {
     var responseMap = self._parseJSON(response[1]);
-    info = {};
+    self._info = {};
     // Just get the fist result of the Map.
     for (var i in responseMap) {
       var detail = responseMap[i];
       var emailParse = detail[20].match(/(.+) <(.+)>/);
-      info.full_email = emailParse[0];
-      info.name = emailParse[1];
-      info.email = emailParse[2];
-      info.id = detail[0];
-      info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
+      self._info.full_email = emailParse[0];
+      self._info.name = emailParse[1];
+      self._info.email = emailParse[2];
+      self._info.id = detail[0];
+      self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
+      self._info.circles = detail[10][1].map(function(element) {
+        return {id: element[0], name: element[1]}
+      });
       break;
     }
-    self._fireCallback(callback, true);
+    self._fireCallback(callback, {
+      status: true,
+      data: self._info
+    });
   }, this.INITIAL_DATA_API);
 };
 
@@ -781,10 +787,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
 
 /**
  * @return {Object.<string, string>} The information from the user.
- *                                    - id
- *                                    - name
- *                                    - email
- *                                    - acl
+ *                                    - id | name | email | acl
  */
 GooglePlusAPI.prototype.getInfo = function() {
   return this._info;
