@@ -1,7 +1,7 @@
 An Unofficial Google+ Circle and Followers API for Google Chrome
 ================================================
 
-It has been 4 months since we have seen any Circle/Posts/Followers
+It has been 6 months since we have seen any Circle/Posts/Followers
 Write/Read API for Google+. Since Google+ is by nature asynchronous
 we could tap into their XHR calls and imitate the requests.
 
