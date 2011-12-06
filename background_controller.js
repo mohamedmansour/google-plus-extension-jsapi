@@ -9,8 +9,11 @@ BackgroundController = function() {
   this.onExtensionLoaded();
 };
 
+/**
+ * @return the native Plus API. Goes past the content script bridge.
+ */
 BackgroundController.prototype.getAPI = function() {
-  return this.plus;
+  return this.plus.plus;
 };
 
 /**
