@@ -4,7 +4,7 @@
  * Mohamed Mansour (http://mohamedmansour.com) *
  * @constructor
  */
-GooglePlusAPI = function() {
+GooglePlusAPI = function(opt) {
   //------------------------ Constants --------------------------
   // Implemented API
   this.CIRCLE_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/circles/?m=true';
@@ -36,7 +36,8 @@ GooglePlusAPI = function() {
   this.MEMBER_SUGGESTION_API   = 'https://plus.google.com/u/0/_/socialgraph/lookup/circle_member_suggestions/'; // s=[[[null, null, "116805285176805120365"]]]&at=
 
 	//------------------------ Private Fields --------------------------
-  this._db = new PlusDB();
+  this._opt = opt || {};
+  this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB();
 
   this._session = null;
   this._info = null;

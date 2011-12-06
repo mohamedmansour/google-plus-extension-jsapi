@@ -1,4 +1,14 @@
 /**
+ * Mock DB for testing.
+ */
+MockDB = function () {};
+MockDB.prototype.open = function() {};
+MockDB.prototype.getCircleEntity = function() {return new MockEntity()};
+MockDB.prototype.getPersonEntity = function() {return new MockEntity()};
+MockDB.prototype.getPersonCircleEntity = function() {return new MockEntity()};
+MockDB.prototype.clearAll = function(callback) {};
+
+/**
  * Storage class responsible for managing the database tansactions for Google+
  *
  * @constructor
