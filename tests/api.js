@@ -44,13 +44,27 @@ $(document).ready(function() {
   });
 
   test('Lookup User Info', function() {
-    expect(2);
+    expect(7);
     stop(2000);
-    plus.lookupUser(function(data) {
-      equals(data.user.name, 'Mohamed Mansour', 'My name');
-      ok(data.circles.length > 0, 'Circle exists');
-      start();
+    var counter = 2;
+    function done() { --counter || start(); }
+    plus.lookupUsers(function(data) {
+      var user = data['116805285176805120365'];
+      ok(user, 'User fetched ok');
+      equals(user.data.name, 'Mohamed Mansour', 'My name');
+      ok(user.circles.length > 0, 'Circle exists');
+      done();
     }, '116805285176805120365', true);
+    
+    plus.lookupUsers(function(data) {
+      var userA = data['116805285176805120365'];
+      var userB = data['117791034087176894458'];
+      ok(userA, 'UserA fetched ok');
+      ok(userB, 'UserB fetched ok');
+      equals(userA.data.name, 'Mohamed Mansour', 'UserA name');
+      equals(userB.data.name, 'John Barrington Craggs', 'UserB name');
+      done();
+    }, ['116805285176805120365', '117791034087176894458']);
   });
 
   test('Current User Info', function() {

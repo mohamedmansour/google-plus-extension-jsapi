@@ -625,18 +625,32 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
  * user. The circle data is basically just the circle ID.
  *
  * @param {function(boolean)} callback
- * @param {string} id The profile ID
+ * @param {Array<string>} id The profile ID
  */
-GooglePlusAPI.prototype.lookupUser = function(callback, id) {
+GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   var self = this;
-  var params = '?n=6&m=[[[null,null,"' + id + '"]]]';
+  var usersParam = [];
+  if (!JSAPIHelper.isArray(ids)) {
+    ids = [ids];
+  }
+  ids.forEach(function(element, i) {
+     usersParam.push('[null,null,"' + element + '"]');
+  });
+  var params = '?n=6&m=[[' + usersParam.join(', ') + ']]';
   var data = 'at=' + this._getSession();
   this._requestService(function(response) {
-    var userObj = self._parseUser(response[1][0][1], true);
-    self._fireCallback(callback, {
-      user: userObj[0],
-      circles: userObj[1]
+    var usersArr = response[1];
+    var users = {};
+    usersArr.forEach(function(element, i) {
+      var userObj = self._parseUser(element[1], true);
+      var user = userObj[0];
+      var circles = userObj[1];
+      users[user.id] = {
+        data: user,
+        circles: circles
+      };
     });
+    self._fireCallback(callback, users);
   }, this.LOOKUP_API + params, data);
 };
 
