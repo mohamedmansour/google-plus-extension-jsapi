@@ -166,10 +166,11 @@ GooglePlusAPI.prototype._fireCallback = function(callback, data) {
  * it. The only way getting that session is from their Google+ pages
  * since it is embedded within the page.
  *
+ * @param {boolean} opt_reset If set, it will reset the internal cache.
  * @return {string} The Google+ user private session used for authentication.
  */
-GooglePlusAPI.prototype._getSession = function() {
-  if (!this._session) {
+GooglePlusAPI.prototype._getSession = function(opt_reset) {
+  if (opt_reset || !this._session) {
     var xhr = $.ajax({
       type: 'GET',
       url: 'https://plus.google.com',
@@ -253,7 +254,7 @@ GooglePlusAPI.prototype.getDatabase = function() {
  * Does the first prefetch.
  */
 GooglePlusAPI.prototype.init = function(callback) {
-  this._getSession();
+  this._getSession(true); // Always reset the cache if called.
   this._fireCallback(callback, true);
 };
 
