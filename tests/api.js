@@ -2,7 +2,33 @@ $(document).ready(function() {
   var plus = new GooglePlusAPI();
 
   module('module');
-
+  
+  test('JAPI Helper Arrays', function() {
+    expect(11);
+    stop(2000);
+    var smartEquals = function(actual, expected) {
+      if (Array.isArray(expected)) {
+        expected = expected.join(',');
+      }
+      if (Array.isArray(actual)) {
+        actual = actual.join(',');
+      }
+      equals(actual, expected);
+    };
+    smartEquals(JSAPIHelper.searchArray(null, ['foo', 'hi']), false);
+    smartEquals(JSAPIHelper.searchArray(null, ['foo', null]), 1);
+    smartEquals(JSAPIHelper.searchArray(null, null), false);
+    smartEquals(JSAPIHelper.searchArray('hi', ['foo', 'hi']), [1]);
+    smartEquals(JSAPIHelper.searchArray('hi', ['foo', ['hi', 'bar']]), [1, 0]);
+    smartEquals(JSAPIHelper.searchArray('hi', ['foo', ['test', ['1', '2'], ['hi', 'hie']]]), [1, 2, 0]);
+    smartEquals(JSAPIHelper.firstDifference('abcd', 'abcd'), false);
+    smartEquals(JSAPIHelper.firstDifference('abcd', 'abcde'), 4);
+    smartEquals(JSAPIHelper.firstDifference('abbd', 'abcd'), 2);
+    smartEquals(JSAPIHelper.firstDifference('a', 'abbb'), 1);
+    smartEquals(JSAPIHelper.firstDifference(null, 'a'), false);
+    start();
+  });
+  
   test('Setup', function() {
     expect(1);
     stop(2000);

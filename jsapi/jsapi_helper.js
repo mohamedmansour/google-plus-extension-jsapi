@@ -20,40 +20,10 @@ JSAPIHelper.inherits = function(childCtor, parentCtor) {
 };
 
 /**
- * Lame test, I know ...
- */
-JSAPIHelper.prototype.test = function() {
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray(null, ['foo', 'hi']), false);
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray(null, ['foo', null]), 1);
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray(null, null), false);
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray('hi', ['foo', 'hi']), [1]);
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray('hi', ['foo', ['hi', 'bar']]), [1, 0]);
-  JSAPIHelper.assertEquals(JSAPIHelper.searchArray('hi', ['foo', ['test', ['1', '2'], ['hi', 'hie']]]), [1, 2, 0]);
-  JSAPIHelper.assertEquals(JSAPIHelper.firstDifference('abcd', 'abcd'), false);
-  JSAPIHelper.assertEquals(JSAPIHelper.firstDifference('abcd', 'abcde'), 4);
-  JSAPIHelper.assertEquals(JSAPIHelper.firstDifference('abbd', 'abcd'), 2);
-  JSAPIHelper.assertEquals(JSAPIHelper.firstDifference('a', 'abbb'), 1);
-  JSAPIHelper.assertEquals(JSAPIHelper.firstDifference(null, 'a'), false);
-};
-
-/**
  * Is a given value a string?
  */
 JSAPIHelper.isString = function(obj) {
   return !!(obj === '' || (obj && obj.charCodeAt && obj.substr));
-};
-
-/**
- * Checks if the item is indeed an Array.
- *
- * @param {*} obj Any item.
- * return {boolean} True if the object is an array, otherwise false.
- */
-JSAPIHelper.isArray = function(obj) {
-  if (!obj) {
-    return false;
-  }
-  return obj.constructor == Array;
 };
 
 /**
@@ -72,12 +42,12 @@ JSAPIHelper.isArray = function(obj) {
  *                                   false if not found.
  */
 JSAPIHelper.searchArray = function(needle, haystack) {
-  if (!JSAPIHelper.isArray(haystack)) {
+  if (!Array.isArray(haystack)) {
     return false;
   }
   for (var i = 0; i < haystack.length; i++) {
     var currentValue = haystack[i];
-    if (JSAPIHelper.isArray(currentValue)) {
+    if (Array.isArray(currentValue)) {
       path = JSAPIHelper.searchArray(needle, currentValue);
       if (path) {
         return [i].concat(path);
@@ -116,10 +86,10 @@ JSAPIHelper.firstDifference = function(a, b) {
  * Testing stuff ...
  */
 JSAPIHelper.assertEquals = function(expected, actual) {
-  if (JSAPIHelper.isArray(expected)) {
+  if (Array.isArray(expected)) {
     expected = expected.join(',');
   }
-  if (JSAPIHelper.isArray(actual)) {
+  if (Array.isArray(actual)) {
     actual = actual.join(',');
   }
   var results = expected == actual;

@@ -88,7 +88,7 @@ GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
       var text = data.responseText;
       var uglyResults = data.responseText.substring(4);
       var results = self._parseJSON(uglyResults);
-      callback(JSAPIHelper.isArray(results) ? results[0] : results);
+      callback(Array.isArray(results) ? results[0] : results);
     }
   };
   var xhr = $.ajax({
@@ -630,7 +630,7 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
 GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   var self = this;
   var usersParam = [];
-  if (!JSAPIHelper.isArray(ids)) {
+  if (!Array.isArray(ids)) {
     ids = [ids];
   }
   ids.forEach(function(element, i) {

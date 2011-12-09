@@ -175,7 +175,7 @@ AbstractEntity.prototype.clear = function(callback) {
  */
 AbstractEntity.prototype.create = function(obj, callback) {
   var self = this;
-  if (!JSAPIHelper.isArray(obj)) {
+  if (!Array.isArray(obj)) {
     obj = [obj];
   }
   this.db.transaction(function(tx) {
@@ -232,7 +232,7 @@ AbstractEntity.prototype.destroy = function(id, callback) {
  */
 AbstractEntity.prototype.update = function(obj, callback) {
   var self = this;
-  if (!JSAPIHelper.isArray(obj)) {
+  if (!Array.isArray(obj)) {
     obj = [obj];
   }
 
@@ -283,7 +283,7 @@ AbstractEntity.prototype.update = function(obj, callback) {
  */
 AbstractEntity.prototype.find = function(select, where, callback) {
   var self = this;
-  var select = JSAPIHelper.isArray(select) ? select : ['*'];
+  var select = Array.isArray(select) ? select : ['*'];
   var where = this.getWhereObject(where);
   var sql = 'SELECT ' + select.join(',') + ' FROM ' + this.name +
             ' WHERE ' + where.keys.join(' AND ');
