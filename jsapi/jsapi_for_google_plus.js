@@ -629,29 +629,48 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
  */
 GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   var self = this;
-  var usersParam = [];
+  var allParams = [];
   if (!Array.isArray(ids)) {
     ids = [ids];
   }
   ids.forEach(function(element, i) {
-     usersParam.push('[null,null,"' + element + '"]');
+     allParams.push('[null,null,"' + element + '"]');
   });
-  var params = '?n=6&m=[[' + usersParam.join(', ') + ']]';
-  var data = 'at=' + this._getSession();
-  this._requestService(function(response) {
-    var usersArr = response[1];
-    var users = {};
-    usersArr.forEach(function(element, i) {
-      var userObj = self._parseUser(element[1], true);
-      var user = userObj[0];
-      var circles = userObj[1];
-      users[user.id] = {
-        data: user,
-        circles: circles
-      };
-    });
-    self._fireCallback(callback, users);
-  }, this.LOOKUP_API + params, data);
+  
+  // We are just limited to the number of requests. In this case, we will create
+  // 40 items in each bucket slice. Then keep doing requests until we finish our
+  // buckets. It is like filling a tub of water with a cup, we keep pooring water
+  // in the cup until we finished filling the tub up.
+  var users = {};
+  var MAX_SLICE = 40;
+  var indexSliced = 0;
+  
+  // Internal request.
+  var doRequest = function() {
+    var usersParam = allParams.slice(indexSliced, indexSliced + MAX_SLICE);
+    if (usersParam.length == 0) {
+      self._fireCallback(callback, users);
+      return;
+    }
+    indexSliced += usersParam.length;
+
+    var params = '?n=6&m=[[' + usersParam.join(', ') + ']]';
+    var data = 'at=' + self._getSession();
+    self._requestService(function(response) {
+      var usersArr = response[1];
+      usersArr.forEach(function(element, i) {
+        var userObj = self._parseUser(element[1], true);
+        var user = userObj[0];
+        var circles = userObj[1];
+        users[user.id] = {
+          data: user,
+          circles: circles
+        };
+      });
+      doRequest();
+    }, self.LOOKUP_API + params, data);
+  };
+  doRequest();
 };
 
 /**
