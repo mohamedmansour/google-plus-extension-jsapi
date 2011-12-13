@@ -118,6 +118,7 @@ Persistence:
 
 Read:
 
+- `boolean isAuthenticated()`
 - `void getProfile(Function({introduction}):callback, String:googleProfileID)`
 - `void getInfo(Function({id, name, email, acl}:callback)`
 - `void getCircles(Function(CircleEntity[]):callback)`

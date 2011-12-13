@@ -28,8 +28,6 @@ GooglePlusAPI = function(opt) {
   this.INCOMING_API            = 'https://plus.google.com/u/0/_/socialgraph/lookup/incoming/?o=[null,null,"116805285176805120365"]&n=1000000';
   this.SOCIAL_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/socialbar/';
   this.INVITES_API             = 'https://plus.google.com/u/0/_/socialgraph/get/num_invites_remaining/';
-  this.HOVERCARD_API           = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercard/'; // ?m=[null,null,"111048918866742956374"]
-  this.SEARCH_API              = 'https://plus.google.com/complete/search?ds=es_profiles&client=es-sharebox&partnerid=es-profiles&q=test';
   this.PROFILE_PHOTOS_API      = 'https://plus.google.com/u/0/_/profiles/getprofilepagephotos/116805285176805120365';
   this.PLUS_API                = 'https://plus.google.com/u/0/_/plusone';
   this.COMMENT_API             = 'https://plus.google.com/u/0/_/stream/comment/';
@@ -190,7 +188,17 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
     var searchForString = ',"https://www.google.com/csi","';
     var startIndex = xhr.responseText.indexOf(searchForString);
     var remainingText = xhr.responseText.substring(startIndex + searchForString.length);
-    this._session = remainingText.substring(0, remainingText.indexOf('"'));
+    var foundSession = remainingText.substring(0, remainingText.indexOf('"'));
+
+    // Validate it.
+    if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
+      this._session = foundSession;
+    }
+    else {
+      // TODO: Somehow bring that back to the user.
+      this._session = null;
+      console.error('Invalid session, please login to Google+');
+    }
   }
   return this._session;
 };
@@ -241,7 +249,29 @@ GooglePlusAPI.prototype._fixImage = function(image) {
   return image;
 };
 
+/**
+ * Verify the session is valid if not, log it and fire the callback quickly.
+ * 
+ * Every caller must return if false.
+ */
+GooglePlusAPI.prototype._verifySession = function(name, args) {
+  if (!this.isAuthenticated()) {
+    var callback = args[0];
+    var params = JSON.stringify(args); // this will remove the functions
+    console.error('Session error. Name: [' + name + '] Arguments: [' + params + ']');
+    this._fireCallback(callback, false);
+    return false;
+  }
+  return true;
+};
+
 //----------------------- Public Functions ------------------------.
+/**
+ * @return True if session is valid to Google+.
+ */
+GooglePlusAPI.prototype.isAuthenticated = function() {
+  return this._session != null;
+};
 
 /**
  * @return Get the pointer to the native database entities.
@@ -255,7 +285,7 @@ GooglePlusAPI.prototype.getDatabase = function() {
  */
 GooglePlusAPI.prototype.init = function(callback) {
   this._getSession(true); // Always reset the cache if called.
-  this._fireCallback(callback, true);
+  this._fireCallback(callback, this.isAuthenticated());
 };
 
 /**
@@ -264,6 +294,10 @@ GooglePlusAPI.prototype.init = function(callback) {
  * @param {boolean} opt_onlyCircles Optional parameter to just persist circle
  */
 GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
+  if (!this._verifySession('refreshCircles', arguments)) {
+    return;
+  }
+  
   var self = this;
   var onlyCircles = opt_onlyCircles || false;
   this._requestService(function(response) {
@@ -352,6 +386,9 @@ GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
  * Invalidate the people who added me cache and rebuild it.
  */
 GooglePlusAPI.prototype.refreshFollowers = function(callback) {
+  if (!this._verifySession('refreshFollowers', arguments)) {
+    return;
+  }
   var self = this;
   this._requestService(function(response) {
     var dirtyFollowers = response[2];
@@ -387,6 +424,9 @@ GooglePlusAPI.prototype.refreshFollowers = function(callback) {
  * Invalidate the people to discover cache and rebuild it.
  */
 GooglePlusAPI.prototype.refreshFindPeople = function(callback) {
+  if (!this._verifySession('refreshFindPeople', arguments)) {
+    return;
+  }
   var self = this;
   this._requestService(function(response) {
     var dirtyUsers = response[1];
@@ -428,6 +468,9 @@ GooglePlusAPI.prototype.refreshFindPeople = function(callback) {
  * @param {function(boolean)} callback
  */
 GooglePlusAPI.prototype.refreshInfo = function(callback) {
+  if (!this._verifySession('refreshInfo', arguments)) {
+    return;
+  }
   var self = this;
   this._requestService(function(response) {
     var responseMap = self._parseJSON(response[1]);
@@ -461,6 +504,9 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
  * @param {{Array.<string>}} users The people to add.
  */
 GooglePlusAPI.prototype.addPeople = function(callback, circle, users) {
+  if (!this._verifySession('addPeople', arguments)) {
+    return;
+  }
   var self = this;
   var usersArray = [];
   users.forEach(function(element, index) {
@@ -498,6 +544,9 @@ GooglePlusAPI.prototype.addPeople = function(callback, circle, users) {
  * @param {{Array.<string>}} users The people to add.
  */
 GooglePlusAPI.prototype.removePeople = function(callback, circle, users) {
+  if (!this._verifySession('removePeople', arguments)) {
+    return;
+  }
   var self = this;
   var usersArray = [];
   users.forEach(function(element, index) {
@@ -526,6 +575,9 @@ GooglePlusAPI.prototype.removePeople = function(callback, circle, users) {
  * @param {string} opt_description Optional description.
  */
 GooglePlusAPI.prototype.createCircle = function(callback, name, opt_description) {
+  if (!this._verifySession('createCircle', arguments)) {
+    return;
+  }
   var self = this;
   var data = 't=2&n=' + encodeURIComponent(name) + '&m=[[]]';
   if (opt_description) {
@@ -551,6 +603,9 @@ GooglePlusAPI.prototype.createCircle = function(callback, name, opt_description)
  * @param {string} id The circle ID.
  */
 GooglePlusAPI.prototype.removeCircle = function(callback, id) {
+  if (!this._verifySession('removeCircle', arguments)) {
+    return;
+  }
   var self = this;
   var data = 'c=["' + id + '"]&at=' + this._getSession();
   this._requestService(function(response) {
@@ -567,6 +622,9 @@ GooglePlusAPI.prototype.removeCircle = function(callback, id) {
  * @param {string} opt_description Optional description.
  */
 GooglePlusAPI.prototype.modifyCircle = function(callback, id, opt_name, opt_description) {
+  if (!this._verifySession('modifyCircle', arguments)) {
+    return;
+  }
   var self = this;
   var requestParams = '?c=["' + id + '"]';
   if (opt_name) {
@@ -593,6 +651,9 @@ GooglePlusAPI.prototype.modifyCircle = function(callback, id, opt_name, opt_desc
  * @param {number} index The index to move that circle to. Must be > 0.
  */
 GooglePlusAPI.prototype.sortCircle = function(callback, circle_id, index) {
+  if (!this._verifySession('sortCircle', arguments)) {
+    return;
+  }
   var self = this;
   index = index > 0 || 0;
   var requestParams = '?c=["' + circle_id + '"]&i=' + parseInt(index);
@@ -609,6 +670,9 @@ GooglePlusAPI.prototype.sortCircle = function(callback, circle_id, index) {
  * @param {string} id The profile ID
  */
 GooglePlusAPI.prototype.getProfile = function(callback, id) {
+  if (!this._verifySession('getProfile', arguments)) {
+    return;
+  }
   var self = this;
   if (isNaN(id)) {
     return {};
@@ -629,6 +693,9 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
  * @param {Array<string>} id The profile ID
  */
 GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
+  if (!this._verifySession('lookupUsers', arguments)) {
+    return;
+  }
   var self = this;
   var allParams = [];
   if (!Array.isArray(ids)) {
@@ -684,6 +751,9 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
  * @param {string} introduction The content.
  */
 GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
+  if (!this._verifySession('saveProfile', arguments)) {
+    return;
+  }
   var self = this;
   if (introduction) {
     introduction = introduction.replace(/"/g, '\\"');
@@ -713,6 +783,9 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
  *                           burst_size    : 8
  */
 GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
+  if (!this._verifySession('search', arguments)) {
+    return;
+  }
   var self = this;
   var extra = opt_extra || {};
   var category = extra.category == 'best' ? 1 : 2;
@@ -727,8 +800,8 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   
   var doRequest = function(searchResults) {
     self._requestService(function(response) {
-      var errorExists = response[1];
-      if (!errorExists) {
+      var errorExists = !response[1] || !response[1][1];
+      if (errorExists) {
         self._fireCallback(callback, {
           status: false,
           data: searchResults
