@@ -12,6 +12,8 @@ Who uses this API:
 
 ![](https://github.com/mohamedmansour/circle-management-extension/raw/master/img/icon32.png) Circle Management Chrome Extension https://plus.google.com/100283465826629314254/about
 
+![](https://lh6.googleusercontent.com/nV1nIGSHN9CsoRFpbM_oL-xuyCKOZEIOG4taCZrgKWDjvOWT9Ywuzpjy4AFFXWVGZLS2EurKFA=s32-h32-e365) Map My Circles for Google+™
+
 What is it about:
 ----
 
