@@ -811,7 +811,8 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         var trends = response[1][3]; // Not Used.
         var dirtySearchResults = response[1][1][0][0];
         processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
-        dirtySearchResults.forEach(function(element, index) {
+        for (var i = 0; i < dirtySearchResults.length; i++) {
+          var element = dirtySearchResults[i];
           var item = {};
           item.type = element[2].toLowerCase();
           item.time = element[30];
@@ -840,13 +841,16 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
           if (element[2] == 'Hangout') {
             var hangoutData = element[82][2][1][0];
             item.data = {};
-            item.data.name = hangoutData[0];
             item.data.url = hangoutData[1];
             item.data.type = hangoutData[6];
             item.data.active = item.data.url == '' ? false : true;
             item.data.id = hangoutData[0];
             item.data.participants = [];
             item.data.extra_data = hangoutData[13];
+            if (item.data.active && item.data.id == '' && item.data.type == 2 /*normal*/) {
+                // Skip this since it isn't a hangout.
+                continue;
+            }
             var cachedOnlineUsers = {};
             var onlineParticipants = hangoutData[3];
             onlineParticipants.forEach(function(elt, index) {
@@ -867,7 +871,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
           if (!extra.type || extra.type == item.type) {
             searchResults.push(item);
           }
-        });
+        };
         
         // Page the results.
         if (precache > 1) {
