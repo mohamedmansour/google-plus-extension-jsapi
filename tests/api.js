@@ -106,4 +106,20 @@ $(document).ready(function() {
       start();
     }, '116805285176805120365', true);
   });
+  
+  test('Find Post', function() {
+    expect(8);
+    stop(2000);
+    plus.lookupPost(function(res) {
+      ok(res.data.is_public);
+      equals(res.data.html, 'Trey Ratcliff hung out with 11 people.');
+      equals(res.data.type, 'hangout', 'Post is a hangout type');
+      equals(res.data.owner.id, '105237212888595777019', 'Hangout owner id');
+      equals(res.data.owner.name, 'Trey Ratcliff', 'Hangout owner');
+      equals(res.data.data.active, false, 'Hangout is not active');
+      equals(res.data.url, 'http://plus.google.com/105237212888595777019/posts/NRZNtwRpB4f');
+      equals(res.data.data.type, 2, 'OnAir Hangout');
+      start();
+    }, '105237212888595777019', 'NRZNtwRpB4f');
+  });
 });

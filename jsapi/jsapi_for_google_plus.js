@@ -21,7 +21,8 @@ GooglePlusAPI = function(opt) {
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
   this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
   this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
-  
+  this.ACTIVITY_API          = 'https://plus.google.com/u/0/_/stream/getactivity/';
+
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
   this.SETTINGS_API            = 'https://plus.google.com/u/0/_/socialgraph/lookup/settings/';
@@ -97,6 +98,81 @@ GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
     async: true,
     complete: success
   });
+};
+
+/**
+ * Parse out the post object since it is mangled data which majority of the
+ * entries are not needed.
+ *
+ * @param {Object<Array>} element Google datastructure.
+ * @return {Object} The parsed post.
+ */
+GooglePlusAPI.prototype._parsePost = function(element) {
+  var item = {};
+  item.type = element[2].toLowerCase();
+  item.time = element[30];
+  item.url = this._buildProfileURLFromItem(element[21]);
+  item.is_public = (element[32] == '1');
+  
+  item.owner = {};
+  item.owner.name = element[3];
+  item.owner.id = element[16];
+  item.owner.image = this._fixImage(element[18]);
+
+  if (element[43]) { // Share?
+    item.share = {};
+    item.share.name = element[43][0];
+    item.share.id = element[43][1];
+    item.share.image = this._fixImage(element[43][4]);
+    item.share.html = element[43][4];
+    item.share.url = this._buildProfileURLFromItem(element[43][4]);
+    item.html = element[47];
+  }
+  else { // Normal
+    item.html = element[4];
+  }
+
+  // Parse hangout item.
+  if (element[2] == 'Hangout') {
+    var hangoutData = element[82][2][1][0];
+    var hangoutURL = hangoutData[1];
+    var hangoutID = hangoutData[0];
+    var hangoutType = hangoutData[6];
+    var isActive = hangoutURL == '' ? false : true;
+    
+    // Skip this since it isn't a hangout. It is just youtube content.
+    if (isActive && hangoutID == '' && hangoutType == 2 /*normal*/) {
+        // Perhaps we want to deal with this later.
+    }
+    else {
+      item.data = {};
+      item.data.url = hangoutURL;
+      item.data.type = hangoutType;
+      item.data.active = isActive;
+      item.data.id = hangoutID;
+      item.data.participants = [];
+      item.data.extra_data = hangoutData[13];
+      
+      var cachedOnlineUsers = {};
+      var onlineParticipants = hangoutData[3];
+      for (var i in onlineParticipants) {
+        var elt = onlineParticipants[i];
+        var user = this._buildUserFromItem(elt[2], elt[0], elt[1], true);
+        cachedOnlineUsers[user.id] = true;
+        item.data.participants.push(user);
+      }
+      var offlineParticipants = hangoutData[4];
+      for (var i in offlineParticipants) {
+        var elt = offlineParticipants[i];
+        var user = this._buildUserFromItem(elt[2], elt[0], elt[1], false);
+        if (!cachedOnlineUsers[user.id]) {
+          item.data.participants.push(user);
+        }
+      }
+    }
+  }
+  
+  return item;
 };
 
 /**
@@ -742,12 +818,36 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
 };
 
 /**
+ * Queries the postID for the specific user.
+ 
+ * @param {function(boolean)} callback
+ * @param {string} userID The profile ID
+ * @param {string} postID The post ID
+ */
+GooglePlusAPI.prototype.lookupPost = function(callback, userID, postID) {
+  var self = this;
+  if (!userID || !postID) {
+    this._fireCallback(callback, {
+      status: false,
+      data: 'You must specifify a userID and postID parameters.'
+    });
+    return;
+  }
+  var params = userID + '?updateId=' + postID;
+  this._requestService(function(response) {
+    var item = self._parsePost(response[1]);
+    console.log(item);
+    self._fireCallback(callback, { status: true, data: item });
+  }, this.ACTIVITY_API + params);
+};
+
+/**
  * Saves the profile information back to the current logged in user.
  *
  * TODO: complete this for the entire profile. This will just persist the introduction portion
  *       not everything else. It is pretty neat how Google is doing this side. kudos.
  *
- * @param {function(boolean)} callback
+ * @param {function(boolean)} callback      
  * @param {string} introduction The content.
  */
 GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
@@ -812,60 +912,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         var dirtySearchResults = response[1][1][0][0];
         processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
         for (var i = 0; i < dirtySearchResults.length; i++) {
-          var element = dirtySearchResults[i];
-          var item = {};
-          item.type = element[2].toLowerCase();
-          item.time = element[30];
-          item.url = self._buildProfileURLFromItem(element[21]);
-          item.is_public = (element[32] == '1');
-          
-          item.owner = {};
-          item.owner.name = element[3];
-          item.owner.id = element[16];
-          item.owner.image = self._fixImage(element[18]);
-
-          if (element[43]) { // Share?
-            item.share = {};
-            item.share.name = element[43][0];
-            item.share.id = element[43][1];
-            item.share.image = self._fixImage(element[43][4]);
-            item.share.html = element[43][4];
-            item.share.url = self._buildProfileURLFromItem(element[43][4]);
-            item.html = element[47];
-          }
-          else { // Normal
-            item.html = element[4];
-          }
-
-          // Parse hangout item.
-          if (element[2] == 'Hangout') {
-            var hangoutData = element[82][2][1][0];
-            item.data = {};
-            item.data.url = hangoutData[1];
-            item.data.type = hangoutData[6];
-            item.data.active = item.data.url == '' ? false : true;
-            item.data.id = hangoutData[0];
-            item.data.participants = [];
-            item.data.extra_data = hangoutData[13];
-            if (item.data.active && item.data.id == '' && item.data.type == 2 /*normal*/) {
-                // Skip this since it isn't a hangout.
-                continue;
-            }
-            var cachedOnlineUsers = {};
-            var onlineParticipants = hangoutData[3];
-            onlineParticipants.forEach(function(elt, index) {
-              var user = self._buildUserFromItem(elt[2], elt[0], elt[1], true);
-              cachedOnlineUsers[user.id] = true;
-              item.data.participants.push(user);
-            });
-            var offlineParticipants = hangoutData[4];
-            offlineParticipants.forEach(function(elt, index) {
-              var user = self._buildUserFromItem(elt[2], elt[0], elt[1], false);
-              if (!cachedOnlineUsers[user.id]) {
-                item.data.participants.push(user);
-              }
-            });
-          }
+          var item = self._parsePost(dirtySearchResults[i]);
           
           // Only add for the specific type.
           if (!extra.type || extra.type == item.type) {
