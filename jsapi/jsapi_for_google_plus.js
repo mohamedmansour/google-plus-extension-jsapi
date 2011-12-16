@@ -838,18 +838,23 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
 
           // Parse hangout item.
           if (element[2] == 'Hangout') {
+            var hangoutData = element[82][2][1][0];
             item.data = {};
-            item.data.active = element[82][2][1][0][1] == '' ? false : true;
-            item.data.id = element[82][2][1][0][0];
+            item.data.name = hangoutData[0];
+            item.data.url = hangoutData[1];
+            item.data.type = hangoutData[6];
+            item.data.active = item.data.url == '' ? false : true;
+            item.data.id = hangoutData[0];
             item.data.participants = [];
+            item.data.extra_data = hangoutData[13];
             var cachedOnlineUsers = {};
-            var onlineParticipants = element[82][2][1][0][3];
+            var onlineParticipants = hangoutData[3];
             onlineParticipants.forEach(function(elt, index) {
               var user = self._buildUserFromItem(elt[2], elt[0], elt[1], true);
               cachedOnlineUsers[user.id] = true;
               item.data.participants.push(user);
             });
-            var offlineParticipants = element[82][2][1][0][4];
+            var offlineParticipants = hangoutData[4];
             offlineParticipants.forEach(function(elt, index) {
               var user = self._buildUserFromItem(elt[2], elt[0], elt[1], false);
               if (!cachedOnlineUsers[user.id]) {
