@@ -341,6 +341,22 @@ GooglePlusAPI.prototype._verifySession = function(name, args) {
   return true;
 };
 
+/**
+ * Verifies the response if successfull.
+ *
+ * @param {Function<Object>} callback The callback to fire back.
+ * @param {Object} The error data to send in the callback.
+ */
+GooglePlusAPI.prototype._isResponseSuccess = function(callback, response) {
+  if (response.error) {
+    this._fireCallback(callback, { status: false, data: response.error + ' - ' + response.text});
+    return false;
+  }
+  else {
+    return true;
+  }
+};
+
 //----------------------- Public Functions ------------------------.
 /**
  * @return True if session is valid to Google+.
@@ -835,8 +851,11 @@ GooglePlusAPI.prototype.lookupPost = function(callback, userID, postID) {
   }
   var params = userID + '?updateId=' + postID;
   this._requestService(function(response) {
+    if (!self._isResponseSuccess(callback, response)) {
+      return;
+    }
+
     var item = self._parsePost(response[1]);
-    console.log(item);
     self._fireCallback(callback, { status: true, data: item });
   }, this.ACTIVITY_API + params);
 };

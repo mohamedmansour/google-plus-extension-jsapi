@@ -108,8 +108,10 @@ $(document).ready(function() {
   });
   
   test('Find Post', function() {
-    expect(8);
+    expect(10);
     stop(2000);
+    var counter = 2;
+    function done() { --counter || start(); }
     plus.lookupPost(function(res) {
       ok(res.data.is_public);
       equals(res.data.html, 'Trey Ratcliff hung out with 11 people.');
@@ -119,7 +121,14 @@ $(document).ready(function() {
       equals(res.data.data.active, false, 'Hangout is not active');
       equals(res.data.url, 'http://plus.google.com/105237212888595777019/posts/NRZNtwRpB4f');
       equals(res.data.data.type, 2, 'OnAir Hangout');
-      start();
+      done();
     }, '105237212888595777019', 'NRZNtwRpB4f');
+    
+    plus.lookupPost(function(res) {
+      ok(!res.status, 'Error Occurred' );
+      equals(res.data, '404 - Not Found' );
+      done();
+    }, '116805285176805120365', 'MYcz4xJRvDr');
+
   });
 });
