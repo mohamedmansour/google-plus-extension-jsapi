@@ -338,8 +338,7 @@ GooglePlusAPI.prototype._verifySession = function(name, args) {
   if (!this.isAuthenticated()) {
     var callback = args[0];
     var params = JSON.stringify(args); // this will remove the functions
-    console.error('Session error. Name: [' + name + '] Arguments: [' + params + ']');
-    this._fireCallback(callback, false);
+    this._fireCallback(callback, { status: false, data: 'Session error. Name: [' + name + '] Arguments: [' + params + ']'});
     return false;
   }
   return true;
