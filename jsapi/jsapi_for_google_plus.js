@@ -955,10 +955,11 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
             type: type
           });
           // Decide whether to do bursts or not.
-          if (burst) {
+          if (burst && 
+               (type==='rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
             type = 'rt';
             if (--burst_size > 0) {
-              setTimeout(function() {
+                setTimeout(function() {
                 doRequest([]);
               }.bind(this), self.BURST_INTERVAL);
             }
