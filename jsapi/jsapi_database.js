@@ -206,7 +206,7 @@ CircleEntity.prototype.find = function(select, where, callback) {
   var sql = ' SELECT circle.id as id, circle.name as name, circle.position as position, circle.description as description, count(circle_id) as count ' +
             ' FROM circle LEFT JOIN circle_person ON circle.id = circle_person.circle_id ' +
             ' WHERE ' + where.keys.join(' AND ') +
-            ' GROUP BY id';
+            ' GROUP BY id ORDER BY position';
  
   this.db.readTransaction(function(tx) {
     tx.executeSql(sql, where.values, function (tx, rs) {
