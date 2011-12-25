@@ -265,16 +265,23 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
     // For some reason, the top command is becoming unstable in Chrome. It
     // freezes the entire browser. For now, we will just discover it since
     // indexOf doesn't freeze while search/match/exec freezes.
+    var isLogged = false;
     var searchForString = ',"https://www.google.com/csi","';
-    var startIndex = xhr.responseText.indexOf(searchForString);
-    var remainingText = xhr.responseText.substring(startIndex + searchForString.length);
-    var foundSession = remainingText.substring(0, remainingText.indexOf('"'));
-
-    // Validate it.
-    if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
-      this._session = foundSession;
+    var responseText = xhr.responseText;
+    if (responseText != null) {
+      var startIndex = responseText.indexOf(searchForString);
+      if (startIndex != -1) {
+        var remainingText = responseText.substring(startIndex + searchForString.length);
+        var foundSession = remainingText.substring(0, remainingText.indexOf('"'));
+      
+        // Validates it.
+        if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
+          this._session = foundSession;
+          isLogged = true;
+        }
+      }
     }
-    else {
+    if (!isLogged) {
       // TODO: Somehow bring that back to the user.
       this._session = null;
       console.error('Invalid session, please login to Google+');
