@@ -900,13 +900,34 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
   }, this.PROFILE_SAVE_API, data);
 };
 
+// Search Type ENUM
+GooglePlusAPI.SearchType = {};
+GooglePlusAPI.SearchType.EVERYTHING = 1;
+GooglePlusAPI.SearchType.PEOPLE_PAGES = 2;
+GooglePlusAPI.SearchType.POSTS = 3;
+GooglePlusAPI.SearchType.SPARKS = 4;
+GooglePlusAPI.SearchType.HANGOUTS = 5;
+
+// Search Privacy ENUM
+GooglePlusAPI.SearchPrivacy = {};
+GooglePlusAPI.SearchPrivacy.EVERYONE = 1;
+GooglePlusAPI.SearchPrivacy.CIRCLES = 2;
+GooglePlusAPI.SearchPrivacy.YOU = 5;
+
+// Search Category ENUM
+GooglePlusAPI.SearchCategory = {};
+GooglePlusAPI.SearchCategory.BEST = 1;
+GooglePlusAPI.SearchCategory.RECENT = 2;
+
 /**
  * Searches Google+ for everything.
  *
  * @param {function(Object)} callback The response callback.
  * @param {string} query The textual query to search on.
  * @param {Object} opt_extra Optional extra params:
- *                           category : 'best' | 'recent'
+ *                           category : GooglePlusAPI.SearchCategory | default RECENT
+ *                           privacy  : GooglePlusAPI.SearchPrivacy | default EVERYONE
+ *                           type     : GooglePlusAPI.SearchType | default EVERYTHING
  *                           precache : | 1+
  *                           burst    : false
  *                           burst_size    : 8
@@ -917,14 +938,17 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   }
   var self = this;
   var extra = opt_extra || {};
-  var category = extra.category == 'best' ? 1 : 2;
+  var category = extra.category || GooglePlusAPI.SearchCategory.RECENT;
+  var type = extra.type || GooglePlusAPI.SearchType.EVERYTHING;
+  var privacy = extra.privacy || GooglePlusAPI.SearchPrivacy.EVERYONE;
   var precache = extra.precache || 1;
   var burst = extra.burst || false;
   var burst_size = extra.burst_size || 8;
-  var type = 'query';
+  var mode = 'query';
   query = query.replace(/"/g, '\\"'); // Escape only quotes for now.
   
-  var data = 'srchrp=[["' + query + '",1,' + category + ',[1]]$SESSION_ID]&at=' + this._getSession();
+  var data = 'srchrp=[["' + query + '",' + type + ',' + category + ',[' + privacy +']' +
+             ']$SESSION_ID]&at=' + this._getSession();
   var processedData = data.replace('$SESSION_ID', '');
   
   var doRequest = function(searchResults) {
@@ -942,11 +966,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
         for (var i = 0; i < dirtySearchResults.length; i++) {
           var item = self._parsePost(dirtySearchResults[i]);
-          
-          // Only add for the specific type.
-          if (!extra.type || extra.type == item.type) {
-            searchResults.push(item);
-          }
+          searchResults.push(item);
         };
         
         // Page the results.
@@ -958,12 +978,12 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
           self._fireCallback(callback, {
             status: true,
             data: searchResults,
-            type: type
+            mode: mode
           });
           // Decide whether to do bursts or not.
           if (burst && 
-               (type==='rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
-            type = 'rt';
+               (mode === 'rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
+            mode = 'rt';
             if (--burst_size > 0) {
                 setTimeout(function() {
                 doRequest([]);
@@ -972,7 +992,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
           }
         }
       }
-    }, self.QUERY_API + type, processedData);
+    }, self.QUERY_API + mode, processedData);
   };
   
   var searchResults = [];
