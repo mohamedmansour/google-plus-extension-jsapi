@@ -113,7 +113,11 @@ GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
 GooglePlusAPI.prototype._parsePost = function(element) {
   var item = {};
   item.type = element[2].toLowerCase();
-  item.time = element[30];
+  item.time = element[5];
+  if (element[70]) {
+    item.time_edited = parseInt((element[70] + '').substring(0, (item.time + '').length));
+  }
+
   item.url = this._buildProfileURLFromItem(element[21]);
   item.is_public = (element[32] == '1');
   
