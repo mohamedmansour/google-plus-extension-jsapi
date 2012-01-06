@@ -23,6 +23,8 @@ release, you can do the following:
 - Create, Modify, Sort, Query, Remove Circles
 - Query, Modify your Profile Information
 - Add, Remove, Move People from and to Circles
+- Real-Time Search
+- Lookup Posts
 
 This is a fully read and write API.
 
@@ -137,6 +139,7 @@ Read:
 
 
 Private Members (only for internal API):
+
 - `Object _parseJSON(String:input)` - Parses the Google Irregular JSON
 - `void _requestService(Function:callback, String:url, String:postData` - Sends an XHR request to Google Service
 - `String _getSession()`- Unique user session that authenticates to persist to your account.
