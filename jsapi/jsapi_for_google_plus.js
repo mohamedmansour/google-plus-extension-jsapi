@@ -142,7 +142,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   // Parse hangout item.
   if (element[2] == 'Hangout') {
     var hangoutData = element[82][2][1][0];
-    var hangoutURL = hangoutData[1];
+    var hangoutURL = hangoutData[1] + '#_' + element[8];
     var hangoutID = hangoutData[0];
     var hangoutType = hangoutData[6];
     var isActive = hangoutURL == '' ? false : true;
