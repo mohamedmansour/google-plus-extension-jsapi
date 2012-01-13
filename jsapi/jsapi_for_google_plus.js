@@ -142,11 +142,13 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   // Parse hangout item.
   if (element[2] == 'Hangout') {
     var hangoutData = element[82][2][1][0];
-    var hangoutURL = hangoutData[1] + '#_' + element[8];
+    var hangoutURL = hangoutData[1];
     var hangoutID = hangoutData[0];
     var hangoutType = hangoutData[6];
-    var isActive = hangoutURL == '' ? false : true;
-    
+    var isActive = (!hangoutURL || hangoutURL == '') ? false : true;
+    if (isActive) {
+      hangoutURL += '#_' + element[8];
+    }
     // Skip this since it isn't a hangout. It is just youtube content.
     if (isActive && hangoutID == '' && hangoutType == 2 /*normal*/) {
         // Perhaps we want to deal with this later.
