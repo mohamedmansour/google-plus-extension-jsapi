@@ -16,6 +16,7 @@ GooglePlusAPI = function(opt) {
   this.PROPERTIES_MUTATE_API   = 'https://plus.google.com/u/0/_/socialgraph/mutate/properties/';
   this.DELETE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/delete/';
   this.SORT_MUTATE_API         = 'https://plus.google.com/u/0/_/socialgraph/mutate/sortorder/';
+  this.BLOCK_MUTATE_API        = 'https://plus.google.com/u/0/_/socialgraph/mutate/block_user/';
   this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
