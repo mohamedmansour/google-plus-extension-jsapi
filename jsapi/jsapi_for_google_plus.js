@@ -773,6 +773,30 @@ GooglePlusAPI.prototype.sortCircle = function(callback, circle_id, index) {
 };
 
 /**
+ * Blocks or unblocks users from your account.
+ * @param {function(boolean)} callback
+ * @param {{Array.<string>}} users The people to add.
+ * @param {boolean} opt_block Should the users be blocked or unblocked (defaults to block).
+ */
+GooglePlusAPI.prototype.modifyBlocked = function(callback, users, opt_block) {
+  if (!this._verifySession('modifyBlocked', arguments)) {
+    return;
+  }
+  var self = this;
+  var usersArray = users.map(function(element) {
+    return '[[null,null,"' + element + '"]]';
+  });
+  var toBlock = 'true';
+  if (opt_block == false) {
+    toBlock = 'false';
+  }
+  var data = 'm=[[' + usersArray.join(',') + '],' + toBlock + ']&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.BLOCK_MUTATE_API, data);
+};
+
+/**
  * Gets access to the entire profile for a specific user.
  *
  * @param {function(boolean)} callback
