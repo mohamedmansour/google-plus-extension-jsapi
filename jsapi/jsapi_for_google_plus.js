@@ -16,6 +16,7 @@ GooglePlusAPI = function(opt) {
   this.PROPERTIES_MUTATE_API   = 'https://plus.google.com/u/0/_/socialgraph/mutate/properties/';
   this.DELETE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/delete/';
   this.SORT_MUTATE_API         = 'https://plus.google.com/u/0/_/socialgraph/mutate/sortorder/';
+  this.BLOCK_MUTATE_API        = 'https://plus.google.com/u/0/_/socialgraph/mutate/block_user/';
   this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
@@ -769,6 +770,30 @@ GooglePlusAPI.prototype.sortCircle = function(callback, circle_id, index) {
   this._requestService(function(response) {
     self._fireCallback(callback, true);
   }, this.SORT_MUTATE_API + requestParams, data);
+};
+
+/**
+ * Blocks or unblocks users from your account.
+ * @param {function(boolean)} callback
+ * @param {{Array.<string>}} users The people to add.
+ * @param {boolean} opt_block Should the users be blocked or unblocked (defaults to block).
+ */
+GooglePlusAPI.prototype.modifyBlocked = function(callback, users, opt_block) {
+  if (!this._verifySession('modifyBlocked', arguments)) {
+    return;
+  }
+  var self = this;
+  var usersArray = users.map(function(element) {
+    return '[[null,null,"' + element + '"]]';
+  });
+  var toBlock = 'true';
+  if (opt_block == false) {
+    toBlock = 'false';
+  }
+  var data = 'm=[[' + usersArray.join(',') + '],' + toBlock + ']&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.BLOCK_MUTATE_API, data);
 };
 
 /**
