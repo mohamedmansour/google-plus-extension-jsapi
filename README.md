@@ -10,9 +10,11 @@ Who uses this API:
 
 ![](https://github.com/mohamedmansour/my-hangouts-extension/raw/master/img/icon32.png) My Hangouts Chrome Extension https://plus.google.com/116935358560979346551/about
 
-![](https://github.com/mohamedmansour/circle-management-extension/raw/master/img/icon32.png) Circle Management Chrome Extension https://plus.google.com/100283465826629314254/about
+![](https://lh4.googleusercontent.com/1wwa7CVUEhHPX-fD5GL6ip-waOagyr9Rbi-gnlXwn6TOPZUYxjEnsj5ui80-pZQQsa_Ku47PQw=s32-h32-e365) Circle Management Chrome Extension https://plus.google.com/100283465826629314254/about
 
 ![](https://lh6.googleusercontent.com/nV1nIGSHN9CsoRFpbM_oL-xuyCKOZEIOG4taCZrgKWDjvOWT9Ywuzpjy4AFFXWVGZLS2EurKFA=s32-h32-e365) Map My Circles for Google+™ https://chrome.google.com/webstore/detail/mcfifkeppchbjlepfbepfhjpkhfalcoa
+
+![](https://lh5.googleusercontent.com/0Amg5dBgOUZaNSOcZl9b6xUeQOVnpjOGZk9DkCZn975X_XzhsIVpe6lGhOJTMFEpczzm22uDWw=s32-h32-e365) Nuke Comments on Google+ https://chrome.google.com/webstore/detail/nfgaadooldinkdjpjbnbgnoaepmajdfh
 
 What is it about:
 ----
