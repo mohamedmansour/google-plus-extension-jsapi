@@ -1,4 +1,4 @@
-An Unofficial Google+ Circle and Followers API for Google Chrome
+An Unofficial Google+ JavaScript API
 ================================================
 
 It has been 6 months since we have seen any Circle/Posts/Followers
