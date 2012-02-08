@@ -21,6 +21,7 @@ GooglePlusAPI = function(opt) {
   this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
+  this.PROFILE_REPORT_API      = 'https://plus.google.com/u/0/_/profiles/reportabuse';
   this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
   this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
   this.ACTIVITY_API          = 'https://plus.google.com/u/0/_/stream/getactivity/';
@@ -950,6 +951,38 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
     self._fireCallback(callback, response.error ? true : false);
   }, this.PROFILE_SAVE_API, data);
 };
+
+/**
+ * Reports a profile as abusive.
+ * @param {function(boolean)} callback
+ * @param {string} userId The user id to report
+ * @param {GooglePlusAPI.AbuseReason} opt_abuseReason The reason to report abuse. Defaults to spam.
+ */
+GooglePlusAPI.prototype.reportProfile = function(callback, userId, opt_abuseReason) {
+  if (!this._verifySession('reportProfile', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!userId) {
+    self._fireCallback(callback, false);
+  }
+
+  if (!opt_abuseReason) {
+    opt_abuseReason = GooglePlusAPI.AbuseReason.SPAM;
+  }
+  var data = 'itemId=' + userId + '&userInfo=[1]&abuseReport=[' + opt_abuseReason +
+      ']&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.PROFILE_REPORT_API, data);
+};
+
+// Abuse Reason ENUM. Corresponds to values used by Google+'s abuse report calls.
+GooglePlusAPI.AbuseReason = {};
+GooglePlusAPI.AbuseReason.SPAM = 1;
+GooglePlusAPI.AbuseReason.NUDITY = 2;
+GooglePlusAPI.AbuseReason.HATE = 3;
+GooglePlusAPI.AbuseReason.FAKE = 8;
 
 // Search Type ENUM
 GooglePlusAPI.SearchType = {};

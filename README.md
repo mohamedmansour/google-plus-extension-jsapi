@@ -123,6 +123,7 @@ Persistence:
 - `void modifyBlocked(Function:doneCallback, Array<String>:usersToModify, boolean:opt_block)` - Modify the blocked state of people. Allows blocking and unblocking.
 - `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
+- `void reportProfile(Function:doneCallback, String:userId, opt_abuseReason)` - Report an abusive profile.
 
 Read:
 
