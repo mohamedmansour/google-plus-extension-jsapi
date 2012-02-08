@@ -121,6 +121,7 @@ Persistence:
 - `void modifyCircle(Function:doneCallback, String:circleID, String:optionalName, String:optionalDescription)` - Modifying circle meta.
 - `void sortCircle(Function:doneCallback, String:circleID, Number:index)` - Sort a circle to the given index, G+ will deal with the order
 - `void modifyBlocked(Function:doneCallback, Array<String>:usersToModify, boolean:opt_block)` - Modify the blocked state of people. Allows blocking and unblocking.
+- `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
 
 Read:
