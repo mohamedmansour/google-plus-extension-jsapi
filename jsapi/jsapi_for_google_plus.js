@@ -17,6 +17,7 @@ GooglePlusAPI = function(opt) {
   this.DELETE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/delete/';
   this.SORT_MUTATE_API         = 'https://plus.google.com/u/0/_/socialgraph/mutate/sortorder/';
   this.BLOCK_MUTATE_API        = 'https://plus.google.com/u/0/_/socialgraph/mutate/block_user/';
+  this.DELETE_COMMENT_API      = 'https://plus.google.com/u/0/_/stream/deletecomment/';
   this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
@@ -794,6 +795,25 @@ GooglePlusAPI.prototype.modifyBlocked = function(callback, users, opt_block) {
   this._requestService(function(response) {
     self._fireCallback(callback, (!response.error));
   }, this.BLOCK_MUTATE_API, data);
+};
+
+/**
+ * Deletes a comment.
+ * @param {function(boolean)} callback
+ * @param {string} commentId The comment id.
+ */
+GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
+  if (!this._verifySession('commentId', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!commentId) {
+    self._fireCallback(callback, false);
+  }
+  var data = 'commentId=' + commentId + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.DELETE_COMMENT_API, data);
 };
 
 /**
