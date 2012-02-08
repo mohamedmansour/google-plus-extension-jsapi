@@ -16,6 +16,12 @@ Who uses this API:
 
 ![](https://lh5.googleusercontent.com/0Amg5dBgOUZaNSOcZl9b6xUeQOVnpjOGZk9DkCZn975X_XzhsIVpe6lGhOJTMFEpczzm22uDWw=s32-h32-e365) Nuke Comments on Google+ https://chrome.google.com/webstore/detail/nfgaadooldinkdjpjbnbgnoaepmajdfh
 
+Who made this:
+---
+
+- Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
+- Tzafrir Rehan (Contributor, developer) - https://plus.google.com/115470071077898720170/posts
+
 What is it about:
 ----
 
