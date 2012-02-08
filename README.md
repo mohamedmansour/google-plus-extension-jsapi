@@ -32,7 +32,7 @@ release, you can do the following:
 - Query, Modify your Profile Information
 - Add, Remove, Move People from and to Circles
 - Real-Time Search
-- Lookup Posts
+- Lookup Posts, Manage comments by reporting and deleting.
 
 This is a fully read and write API.
 
