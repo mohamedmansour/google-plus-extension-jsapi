@@ -20,7 +20,7 @@ Who made this:
 ---
 
 - Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
-- Tzafrir Rehan (Contributor, developer) - https://plus.google.com/115470071077898720170/posts
+- Tzafrir Rehan (Contributed reportProfile, deleteComment, modifyBlocked) - https://plus.google.com/115470071077898720170/posts
 
 What is it about:
 ----
