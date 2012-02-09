@@ -967,10 +967,8 @@ GooglePlusAPI.prototype.reportProfile = function(callback, userId, opt_abuseReas
     self._fireCallback(callback, false);
   }
 
-  if (!opt_abuseReason) {
-    opt_abuseReason = GooglePlusAPI.AbuseReason.SPAM;
-  }
-  var data = 'itemId=' + userId + '&userInfo=[1]&abuseReport=[' + opt_abuseReason +
+  var reason = opt_abuseReason || GooglePlusAPI.AbuseReason.SPAM;
+  var data = 'itemId=' + userId + '&userInfo=[1]&abuseReport=[' + reason +
       ']&at=' + this._getSession();
   this._requestService(function(response) {
     self._fireCallback(callback, (!response.error));
