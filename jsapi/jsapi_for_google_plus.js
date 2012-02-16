@@ -24,7 +24,8 @@ GooglePlusAPI = function(opt) {
   this.PROFILE_REPORT_API      = 'https://plus.google.com/u/0/_/profiles/reportabuse';
   this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
   this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
-  this.ACTIVITY_API          = 'https://plus.google.com/u/0/_/stream/getactivity/';
+  this.ACTIVITY_API            = 'https://plus.google.com/u/0/_/stream/getactivity/';
+  this.ACTIVITIES_API          = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
 
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -894,6 +895,42 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   };
   doRequest();
 };
+
+/**
+ * Lookups the activities for the circle.
+ *
+ * @param {function(data)} callback The response for the call, where
+ *                                  the parameter is the data for the circles.
+ * @param {string} circleID The ID of the circle.
+ */
+GooglePlusAPI.prototype.lookupActivities = function(callback, circleID) {
+  if (!this._verifySession('lookupActivities', arguments)) {
+    return;
+  }
+  var self = this;
+  var params = '?sp=' + encodeURIComponent('[1,2,null,"' + circleID + '",null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]');
+  this._requestService(function(response) {
+    var errorExists = !response[1];
+    if (errorExists) {
+      self._fireCallback(callback, {
+        status: false,
+        data: []
+      });
+    } else {
+      var dirtyPosts = response[1][0];
+      var cleanPosts = [];
+      var post = null;
+      for (post in dirtyPosts) {
+        cleanPosts.push(self._parsePost(dirtyPosts[post]));
+      }
+      self._fireCallback(callback, {
+        status: true,
+        data: cleanPosts
+      });
+    }
+  }, this.ACTIVITIES_API + params);
+};
+
 
 /**
  * Queries the postID for the specific user.
