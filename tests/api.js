@@ -126,7 +126,7 @@ $(document).ready(function() {
     
     plus.lookupPost(function(res) {
       ok(!res.status, 'Error Occurred' );
-      equals(res.data, '404 - Not Found' );
+      equals(res.data, '400 - Bad Request' );
       done();
     }, '116805285176805120365', 'MYcz4xJRvDr');
 
