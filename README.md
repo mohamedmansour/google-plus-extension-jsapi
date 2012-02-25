@@ -124,9 +124,10 @@ Persistence:
 - `void removePeople(Function:doneCallback, String:circleName, Array<String>:usersToRemove)` - Removing people from a circle
 - `void createCircle(Function:doneCallback, String:circleName, String:optionalDescription)` - Creating a circle.
 - `void removeCircle(Function:doneCallback, String:circleID)` - Removing a circle.
-- `void modifyCircle(Function:doneCallback, String:circleID, String:optionalName, String:optionalDescription)` - Modifying circle meta.
 - `void sortCircle(Function:doneCallback, String:circleID, Number:index)` - Sort a circle to the given index, G+ will deal with the order
+- `void modifyCircle(Function:doneCallback, String:circleID, String:optionalName, String:optionalDescription)` - Modifying circle meta.
 - `void modifyBlocked(Function:doneCallback, Array<String>:usersToModify, boolean:opt_block)` - Modify the blocked state of people. Allows blocking and unblocking.
+- `void modifyMute(Function:doneCallback, String:activityID, Boolean:muteStatus)` - Sets the mute status for a specific item.
 - `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
 - `void reportProfile(Function:doneCallback, String:userId, opt_abuseReason)` - Report an abusive profile.

@@ -26,6 +26,7 @@ GooglePlusAPI = function(opt) {
   this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
   this.ACTIVITY_API            = 'https://plus.google.com/u/0/_/stream/getactivity/';
   this.ACTIVITIES_API          = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
+  this.MUTE_ACTIVITY_API       = 'https://plus.google.com/_/stream/muteactivity/';
 
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -957,6 +958,28 @@ GooglePlusAPI.prototype.lookupPost = function(callback, userID, postID) {
     var item = self._parsePost(response[1]);
     self._fireCallback(callback, { status: true, data: item });
   }, this.ACTIVITY_API + params);
+};
+
+/**
+ * Sets the mute activity for the specific item.
+ *
+ * @param {function(boolean)} callback
+ * @param {string} itemId The item id.
+ * @param {boolean} muteStatus True if requires a mute.
+ */
+GooglePlusAPI.prototype.modifyMute = function(callback, itemId, muteStatus) {
+  if (!this._verifySession('setPostMute', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!itemId) {
+    self._fireCallback(callback, false);
+  }
+  var mute = muteStatus || false;
+  var data = 'itemId=' + itemId + '&mute=' + mute + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.DELETE_COMMENT_API, data);
 };
 
 /**
