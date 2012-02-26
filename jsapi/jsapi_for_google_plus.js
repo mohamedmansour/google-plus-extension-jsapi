@@ -7,28 +7,29 @@
 GooglePlusAPI = function(opt) {
   //------------------------ Constants --------------------------
   // Implemented API
-  this.CIRCLE_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/circles/?m=true';
-  this.FOLLOWERS_API           = 'https://plus.google.com/u/0/_/socialgraph/lookup/followers/?m=1000000';
-  this.FIND_PEOPLE_API         = 'https://plus.google.com/u/0/_/socialgraph/lookup/find_more_people/?m=10000';
-  this.MODIFYMEMBER_MUTATE_API = 'https://plus.google.com/u/0/_/socialgraph/mutate/modifymemberships/';
-  this.REMOVEMEMBER_MUTATE_API = 'https://plus.google.com/u/0/_/socialgraph/mutate/removemember/';
-  this.CREATE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/create/';
-  this.PROPERTIES_MUTATE_API   = 'https://plus.google.com/u/0/_/socialgraph/mutate/properties/';
-  this.DELETE_MUTATE_API       = 'https://plus.google.com/u/0/_/socialgraph/mutate/delete/';
-  this.SORT_MUTATE_API         = 'https://plus.google.com/u/0/_/socialgraph/mutate/sortorder/';
-  this.BLOCK_MUTATE_API        = 'https://plus.google.com/u/0/_/socialgraph/mutate/block_user/';
-  this.DELETE_COMMENT_API      = 'https://plus.google.com/u/0/_/stream/deletecomment/';
-  this.INITIAL_DATA_API        = 'https://plus.google.com/u/0/_/initialdata?key=14';
-  this.PROFILE_GET_API         = 'https://plus.google.com/u/0/_/profiles/get/';
-  this.PROFILE_SAVE_API        = 'https://plus.google.com/u/0/_/profiles/save?_reqid=0';
-  this.PROFILE_REPORT_API      = 'https://plus.google.com/u/0/_/profiles/reportabuse';
-  this.QUERY_API               = 'https://plus.google.com/u/0/_/s/';
-  this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
-  this.ACTIVITY_API            = 'https://plus.google.com/u/0/_/stream/getactivity/';
-  this.ACTIVITIES_API          = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
-  this.MUTE_ACTIVITY_API       = 'https://plus.google.com/u/0/_/stream/muteactivity/';
-  this.POST_API                = 'https://plus.google.com/u/0/_/sharebox/post/?spam=20&rt=j';
-  
+  this.CIRCLE_API              = 'https://plus.google.com/${pagetoken}/_/socialgraph/lookup/circles/?m=true';
+  this.FOLLOWERS_API           = 'https://plus.google.com/${pagetoken}/_/socialgraph/lookup/followers/?m=1000000';
+  this.FIND_PEOPLE_API         = 'https://plus.google.com/${pagetoken}/_/socialgraph/lookup/find_more_people/?m=10000';
+  this.MODIFYMEMBER_MUTATE_API = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/modifymemberships/';
+  this.REMOVEMEMBER_MUTATE_API = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/removemember/';
+  this.CREATE_MUTATE_API       = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/create/';
+  this.PROPERTIES_MUTATE_API   = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/properties/';
+  this.DELETE_MUTATE_API       = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/delete/';
+  this.SORT_MUTATE_API         = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/sortorder/';
+  this.BLOCK_MUTATE_API        = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/block_user/';
+  this.DELETE_COMMENT_API      = 'https://plus.google.com/${pagetoken}/_/stream/deletecomment/';
+  this.INITIAL_DATA_API        = 'https://plus.google.com/${pagetoken}/_/initialdata?key=14';
+  this.PROFILE_GET_API         = 'https://plus.google.com/${pagetoken}/_/profiles/get/';
+  this.PROFILE_SAVE_API        = 'https://plus.google.com/${pagetoken}/_/profiles/save?_reqid=0';
+  this.PROFILE_REPORT_API      = 'https://plus.google.com/${pagetoken}/_/profiles/reportabuse';
+  this.QUERY_API               = 'https://plus.google.com/${pagetoken}/_/s/';
+  this.LOOKUP_API              = 'https://plus.google.com/${pagetoken}/_/socialgraph/lookup/hovercards/';
+  this.ACTIVITY_API            = 'https://plus.google.com/${pagetoken}/_/stream/getactivity/';
+  this.ACTIVITIES_API          = 'https://plus.google.com/${pagetoken}/_/stream/getactivities/';
+  this.MUTE_ACTIVITY_API       = 'https://plus.google.com/${pagetoken}/_/stream/muteactivity/';
+  this.POST_API                = 'https://plus.google.com/${pagetoken}/_/sharebox/post/?spam=20&rt=j';
+  this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
+
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
   this.SETTINGS_API            = 'https://plus.google.com/u/0/_/socialgraph/lookup/settings/';
@@ -43,6 +44,7 @@ GooglePlusAPI = function(opt) {
 	//------------------------ Private Fields --------------------------
   this._opt = opt || {};
   this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB();
+  this._googleid = this._opt.googleid || 0;
 
   this._session = null;
   this._info = null;
@@ -69,22 +71,36 @@ GooglePlusAPI.prototype._parseJSON = function(input) {
 };
 
 /**
+ * Cleansup the URL by replacing the template variables.
+ *
+ * @param {string} urlTemplate the URL to parse out the templates.
+ */
+GooglePlusAPI.prototype._parseURL = function(urlTemplate) {
+  var pagetoken = 'u/' + this._googleid;
+  if (this._pageid) { // TODO: Not Yet Supported!
+    pagetoken += '/b/' + this.pageid;
+  }
+  return urlTemplate.replace(/\${pagetoken}/g, pagetoken);
+};
+
+/**
  * Sends a request to Google+ through the extension. Does some parsing to fix
  * the data when retrieved.
  *
  * @param {function(Object.<string, Object>)} callback
- * @param {string} url The URL to request.
+ * @param {string} urlTemplate The URL template to request.
  * @param {string} postData If specified, it will do a POST with the data.
  */
-GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
-  /*
-  // This somehow doesn't work perhaps missing some headers :< Use jQuery to make this portion easier.
-  var xhr = new XMLHttpRequest();
-  xhr.open(postData ? 'POST' : 'GET', url, false);
-  xhr.overrideMimeType('application/json; charset=UTF-8');
-  xhr.send(postData || null);
-  */
+GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postData) {
   var self = this;
+  if (!urlTemplate) {
+    callback({error: true, text: 'URL to request is missing.'});
+    return;
+  }
+  
+  var url = this._parseURL(urlTemplate);
+  
+  // When the XHR was successfull, do some post processing to clean up the data.
   var success = function(data, textStatus, jqXHR) {
     if (data.status != 200) {
       callback({
@@ -99,6 +115,8 @@ GooglePlusAPI.prototype._requestService = function(callback, url, postData) {
       callback(Array.isArray(results) ? results[0] : results);
     }
   };
+  // TODO: This is the only jQuery part, try to convert it to plain old JavaScript so we could
+  //       remove the dependency of using the jQuery library!
   var xhr = $.ajax({
     type: postData ? 'POST' : 'GET',
     url: url,
@@ -923,6 +941,37 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
     };
     self._fireCallback(callback, obj);
   }, this.PROFILE_GET_API + id);
+};
+
+/**
+ * Gets a list of pages from the users profile.
+ *
+ * @param {function(boolean)} callback
+ * @param {string} id The profile ID
+ */
+GooglePlusAPI.prototype.getPages = function(callback) {
+  if (!this._verifySession('getPages', arguments)) {
+    return;
+  }
+  var self = this;
+  this._requestService(function(response) {
+    var dirtyPages = response[1];
+    var cleanPages = [];
+    if (dirtyPages && dirtyPages.length > 0) {
+      dirtyPages.forEach(function(element, i) {
+        var page = {};
+        page.url =  element[2];
+        page.image = self._fixImage(element[3]);
+        page.name = element[4][1];
+        // page links => element[11][0]
+        page.about = element[14][1];
+        page.id = element[30];
+        page.tagline = element[33][1];
+        cleanPages.push(page);
+      });
+    }
+    self._fireCallback(callback, { status: true, data: cleanPages });
+  }, this.PAGES_API);
 };
 
 /**

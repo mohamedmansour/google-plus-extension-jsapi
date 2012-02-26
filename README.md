@@ -149,9 +149,9 @@ Read:
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
 - `void search(Function(data):callback, String:query, Object:{category, precache, burst, burst_size})`
 - `void lookupUsers(Function(data):callback, Array<String:googleProfileID>)`
-Fix init() callback. Fix quoted acl.
 - `void lookupPost(Function(data):callback, String:googleProfileID, String:postProfileID)`
 - `void lookupActivities(Function(data):callback, String:circleID)`
+- `void getPages(Function(data):callback)`
 
 Private Members (only for internal API):
 
