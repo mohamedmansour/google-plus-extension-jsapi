@@ -21,6 +21,7 @@ Who made this:
 
 - Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
 - Tzafrir Rehan (Contributed reportProfile, deleteComment, modifyBlocked) - https://plus.google.com/115470071077898720170/posts
+- Jingqin Lynn (Contributed newPost) - https://plus.google.com/117239089659078825668/posts
 
 What is it about:
 ----
@@ -131,6 +132,7 @@ Persistence:
 - `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
 - `void reportProfile(Function:doneCallback, String:userId, opt_abuseReason)` - Report an abusive profile.
+- `void newPost(Function:doneCallback, String:content)` - Creates a new post on the stream.
 
 Read:
 
@@ -147,6 +149,7 @@ Read:
 - `void getPersonWhoAddedMe(String:googleProfileID, Function(PersonEntity):callback)`
 - `void search(Function(data):callback, String:query, Object:{category, precache, burst, burst_size})`
 - `void lookupUsers(Function(data):callback, Array<String:googleProfileID>)`
+Fix init() callback. Fix quoted acl.
 - `void lookupPost(Function(data):callback, String:googleProfileID, String:postProfileID)`
 - `void lookupActivities(Function(data):callback, String:circleID)`
 
