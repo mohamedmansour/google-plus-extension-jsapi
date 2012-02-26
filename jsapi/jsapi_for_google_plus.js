@@ -26,8 +26,8 @@ GooglePlusAPI = function(opt) {
   this.LOOKUP_API              = 'https://plus.google.com/u/0/_/socialgraph/lookup/hovercards/';
   this.ACTIVITY_API            = 'https://plus.google.com/u/0/_/stream/getactivity/';
   this.ACTIVITIES_API          = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
-  this.MUTE_ACTIVITY_API       = 'https://plus.google.com/_/stream/muteactivity/';
-  this.POST_API                = 'https://plus.google.com/_/sharebox/post/?spam=20&rt=j';
+  this.MUTE_ACTIVITY_API       = 'https://plus.google.com/u/0/_/stream/muteactivity/';
+  this.POST_API                = 'https://plus.google.com/u/0/_/sharebox/post/?spam=20&rt=j';
   
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -1219,6 +1219,8 @@ GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
 };
 
 /**
+ * Creates a new Google+ Public post on the existing users stream.
+ *
  * @param {string} content The content of the new post.
  * @param {function(Object)} callback The post has been shared.
  */
