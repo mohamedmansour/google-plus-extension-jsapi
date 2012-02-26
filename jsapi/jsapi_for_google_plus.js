@@ -1224,12 +1224,12 @@ GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
  * @param {string} content The content of the new post.
  * @param {function(Object)} callback The post has been shared.
  */
-GooglePlusAPI.prototype.newPost = function(callback, content) {
+GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId) {
   if (!this._verifySession('newPost', arguments)) {
     return;
   }
   var self = this;
-  if (!content) {
+  if (!content && !sharedPostId) {
     self._fireCallback(callback, false);
   }
   
@@ -1238,9 +1238,10 @@ GooglePlusAPI.prototype.newPost = function(callback, content) {
       data[i] = null;
   }
   
-  data[0] = content;
-  data[1] = "oz:" + this.getInfo().id + "." + new Date().getTime().toString(16) + ".0";
-  data[6] = "[]";
+  data[0] = content || '';
+  data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
+  data[2] = sharedPostId || null;
+  data[6] = '[]';
   data[8] = JSON.parse(this.getInfo().acl);
   data[9] = true;
   data[10] = [];
@@ -1254,7 +1255,7 @@ GooglePlusAPI.prototype.newPost = function(callback, content) {
   data[29] = false;
   data[36] = [];
   
-  var params = "spar=" + encodeURIComponent(JSON.stringify(data)) + '&at=' + encodeURIComponent(this._getSession());
+  var params = 'spar=' + encodeURIComponent(JSON.stringify(data)) + '&at=' + encodeURIComponent(this._getSession());
   
   this._requestService(function(response) {
     self._fireCallback(callback, (!response.error));
