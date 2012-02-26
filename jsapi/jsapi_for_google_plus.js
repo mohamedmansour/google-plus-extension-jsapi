@@ -379,6 +379,95 @@ GooglePlusAPI.prototype._isResponseSuccess = function(callback, response) {
   }
 };
 
+/**
+ * Create an array of null items.
+ *
+ * @param {int} length The length of the array.
+ */
+GooglePlusAPI.prototype._nullArray = function(length) {
+  var data = new Array(length);
+  for(var i = 0; i < length; i++) {
+      data[i] = null;
+  }
+  return data;
+};
+
+/**
+ * Create a base media item.
+ * @param {Media} item A media item. (Media: .href, .mime, .type, .src, .mediaProvider(Optional))
+*/
+GooglePlusAPI.prototype._createMediaBase = function(item) {
+  var mediaDetails = [null,item.href,null,item.mime,item.type];
+  
+  var mediaItem = this._nullArray(48);
+  mediaItem[9] = [];
+  mediaItem[24] = mediaDetails;
+  mediaItem[41] = [[null,item.src,null,null],[null,item.src,null,null]];
+  mediaItem[47] = [[null,item.mediaProvider || "","http://google.com/profiles/media/provider",""]];
+  
+  return mediaItem;
+};
+
+/**
+ * Create a document media item.
+ * @param {DocumentMedia} doc A document media item. (DocumentMedia: .href, .type = "document", .mime(Optional), .src(Optional), .mediaProvider(Optional))
+*/
+GooglePlusAPI.prototype._createMediaDocument = function(doc) {
+  doc.mime = doc.mime || "text/html";
+  if(!doc.src) {
+    if(!doc.domain) {
+      var match = doc.href.match(/(\w+\.)+(\w+)/);
+      if(match) {
+        doc.domain = match[0];
+      }
+    }
+    doc.src = doc.domain ? ("//s2.googleusercontent.com/s2/favicons?domain=" + doc.domain) : null;
+  }
+  
+  var mediaItem = this._createMediaBase(doc);
+  
+  mediaItem[3] = doc.title || doc.href;
+  mediaItem[21] = doc.content || "";
+  
+  return mediaItem;
+};
+
+/**
+ * Create an image media item.
+ * @param {ImageMedia} item An image media item. (ImageMedia: .type = "photo", .width, .height, .href or .src, .mime(Optional), .mediaProvider(Optional))
+*/
+GooglePlusAPI.prototype._createMediaImage = function(image) {
+  image.mediaProvider = image.mediaProvider || "images";
+  image.mime = image.mime || "image/jpeg";
+  image.href = image.href || image.src;
+  image.src = image.src || image.href;
+  var mediaItem = this._createMediaBase(image);
+  
+  mediaItem[5] = [null,image.src];
+  
+  var imageDetails = this._nullArray(9);
+  imageDetails[7] = image.width;
+  imageDetails[8] = image.height;
+  
+  mediaItem[24] = mediaItem[24].concat(imageDetails);
+  
+  return mediaItem;
+};
+
+/**
+ * Create an array which represents a media item. Can be used for adding new posts.
+ * @param {Media} item A media item, either DocumentMedia or ImageMedia.
+*/
+GooglePlusAPI.prototype._createMediaItem = function(item) {
+  switch(item.type) {
+    case 'document':
+      return this._createMediaDocument(item);
+    case 'photo':
+      return this._createMediaImage(item);
+  }
+  return null;
+};
+
 //----------------------- Public Functions ------------------------.
 /**
  * @return True if session is valid to Google+.
@@ -1223,8 +1312,10 @@ GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
  *
  * @param {string} content The content of the new post.
  * @param {function(Object)} callback The post has been shared.
+ * @param {string} sharedPostId An existing post to share.
+ * @param {Media[]} media An array of media elements.
  */
-GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId) {
+GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId, media) {
   if (!this._verifySession('newPost', arguments)) {
     return;
   }
@@ -1233,15 +1324,19 @@ GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId) {
     self._fireCallback(callback, false);
   }
   
-  var data = new Array(37);
-  for(var i = 0; i < data.length; i++) {
-      data[i] = null;
+  var sMedia = [];
+  if(media) {
+    for(var i in media) {
+      sMedia.push(JSON.stringify(this._createMediaItem(media[i])));
+    }
   }
+  
+  var data = this._nullArray(37);
   
   data[0] = content || '';
   data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
   data[2] = sharedPostId || null;
-  data[6] = '[]';
+  data[6] = JSON.stringify(sMedia);
   data[8] = JSON.parse(this.getInfo().acl);
   data[9] = true;
   data[10] = [];
