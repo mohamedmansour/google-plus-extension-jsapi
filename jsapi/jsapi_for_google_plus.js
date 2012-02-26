@@ -27,7 +27,8 @@ GooglePlusAPI = function(opt) {
   this.ACTIVITY_API            = 'https://plus.google.com/u/0/_/stream/getactivity/';
   this.ACTIVITIES_API          = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
   this.MUTE_ACTIVITY_API       = 'https://plus.google.com/_/stream/muteactivity/';
-
+  this.POST_API                = 'https://plus.google.com/_/sharebox/post/?spam=20&rt=j';
+  
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
   this.SETTINGS_API            = 'https://plus.google.com/u/0/_/socialgraph/lookup/settings/';
@@ -38,7 +39,7 @@ GooglePlusAPI = function(opt) {
   this.PLUS_API                = 'https://plus.google.com/u/0/_/plusone';
   this.COMMENT_API             = 'https://plus.google.com/u/0/_/stream/comment/';
   this.MEMBER_SUGGESTION_API   = 'https://plus.google.com/u/0/_/socialgraph/lookup/circle_member_suggestions/'; // s=[[[null, null, "116805285176805120365"]]]&at=
-
+  
 	//------------------------ Private Fields --------------------------
   this._opt = opt || {};
   this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB();
@@ -398,7 +399,14 @@ GooglePlusAPI.prototype.getDatabase = function() {
  */
 GooglePlusAPI.prototype.init = function(callback) {
   this._getSession(true); // Always reset the cache if called.
-  this._fireCallback(callback, this.isAuthenticated());
+  var self = this;
+  if(this.isAuthenticated()) {
+    this.refreshInfo(function() {
+        self._fireCallback(callback, true);
+    });
+  } else {
+    this._fireCallback(callback, false);
+  }
 };
 
 /**
@@ -1208,4 +1216,45 @@ GooglePlusAPI.prototype.getPeopleWhoAddedMe = function(callback) {
  */
 GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
   this._db.getPersonEntity().find([], {added_me: 'Y', id: id}, callback);
+};
+
+/**
+ * @param {string} content The content of the new post.
+ * @param {function(Object)} callback The post has been shared.
+ */
+GooglePlusAPI.prototype.newPost = function(callback, content) {
+  if (!this._verifySession('newPost', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!content) {
+    self._fireCallback(callback, false);
+  }
+  
+  var data = new Array(37);
+  for(var i = 0; i < data.length; i++) {
+      data[i] = null;
+  }
+  
+  data[0] = content;
+  data[1] = "oz:" + this.getInfo().id + "." + new Date().getTime().toString(16) + ".0";
+  data[6] = "[]";
+  data[8] = JSON.parse(this.getInfo().acl);
+  data[9] = true;
+  data[10] = [];
+  data[11] = false;
+  data[12] = false;
+  data[14] = [];
+  data[15] = false;
+  data[16] = false;
+  data[27] = false;
+  data[28] = false;
+  data[29] = false;
+  data[36] = [];
+  
+  var params = "spar=" + encodeURIComponent(JSON.stringify(data)) + '&at=' + encodeURIComponent(this._getSession());
+  
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.POST_API, params);
 };
