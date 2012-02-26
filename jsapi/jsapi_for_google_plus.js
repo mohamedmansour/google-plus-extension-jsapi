@@ -1226,6 +1226,62 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
 };
 
 /**
+ * Creates a new Google+ Public post on the existing users stream.
+ *
+ * @param {function(Object)} callback The post has been shared.
+ * @param {Object} postObj the object that we are about to post that contains:
+ *                            String:content - The content of the new post.
+ *                            String:share_id - An existing post to share.
+ *                            Media[]:media - An array of media elements.
+ */
+GooglePlusAPI.prototype.newPost = function(callback, postObj) {
+  if (!this._verifySession('newPost', arguments)) {
+    return;
+  }
+  
+  var content = postObj.content || null;
+  var sharedPostId = postObj.share_id || null;
+  var media = postObj = postObj.media || null;
+
+  var self = this;
+  if (!content && !sharedPostId) {
+    self._fireCallback(callback, false);
+  }
+  
+  var sMedia = [];
+  if(media) {
+    for(var i in media) {
+      sMedia.push(JSON.stringify(this._createMediaItem(media[i])));
+    }
+  }
+  
+  var data = JSAPIHelper.nullArray(37);
+  
+  data[0] = content || '';
+  data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
+  data[2] = sharedPostId;
+  data[6] = JSON.stringify(sMedia);
+  data[8] = JSON.parse(this.getInfo().acl);
+  data[9] = true;
+  data[10] = [];
+  data[11] = false;
+  data[12] = false;
+  data[14] = [];
+  data[15] = false;
+  data[16] = false;
+  data[27] = false;
+  data[28] = false;
+  data[29] = false;
+  data[36] = [];
+  
+  var params = 'spar=' + encodeURIComponent(JSON.stringify(data)) + '&at=' + encodeURIComponent(this._getSession());
+  
+  this._requestService(function(response) {
+    self._fireCallback(callback, (!response.error));
+  }, this.POST_API, params);
+};
+
+/**
  * @return {Object.<string, string>} The information from the user.
  *                                    - id | name | email | acl
  */
@@ -1292,54 +1348,4 @@ GooglePlusAPI.prototype.getPeopleWhoAddedMe = function(callback) {
  */
 GooglePlusAPI.prototype.getPersonWhoAddedMe = function(id, callback) {
   this._db.getPersonEntity().find([], {added_me: 'Y', id: id}, callback);
-};
-
-/**
- * Creates a new Google+ Public post on the existing users stream.
- *
- * @param {string} content The content of the new post.
- * @param {function(Object)} callback The post has been shared.
- * @param {string} sharedPostId An existing post to share.
- * @param {Media[]} media An array of media elements.
- */
-GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId, media) {
-  if (!this._verifySession('newPost', arguments)) {
-    return;
-  }
-  var self = this;
-  if (!content && !sharedPostId) {
-    self._fireCallback(callback, false);
-  }
-  
-  var sMedia = [];
-  if(media) {
-    for(var i in media) {
-      sMedia.push(JSON.stringify(this._createMediaItem(media[i])));
-    }
-  }
-  
-  var data = JSAPIHelper.nullArray(37);
-  
-  data[0] = content || '';
-  data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
-  data[2] = sharedPostId || null;
-  data[6] = JSON.stringify(sMedia);
-  data[8] = JSON.parse(this.getInfo().acl);
-  data[9] = true;
-  data[10] = [];
-  data[11] = false;
-  data[12] = false;
-  data[14] = [];
-  data[15] = false;
-  data[16] = false;
-  data[27] = false;
-  data[28] = false;
-  data[29] = false;
-  data[36] = [];
-  
-  var params = 'spar=' + encodeURIComponent(JSON.stringify(data)) + '&at=' + encodeURIComponent(this._getSession());
-  
-  this._requestService(function(response) {
-    self._fireCallback(callback, (!response.error));
-  }, this.POST_API, params);
 };
