@@ -289,18 +289,7 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
         // Validates it.
         if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
           this._session = foundSession;
-          
-          //Now let's get the user ID of the current user.
-          startIndex = remainingText.indexOf('["');
-          if (startIndex != -1) {
-            var remainingText = remainingText.substring(startIndex + 2);
-            var userId = remainingText.substring(0, remainingText.indexOf('"]'));
-            // Validates user ID
-            if(userId.match(/^[0-9]+$/)) {
-              this._userId = userId;
-              isLogged = true;
-            }
-          }
+          isLogged = true;
         }
       }
     }
@@ -410,6 +399,7 @@ GooglePlusAPI.prototype.getDatabase = function() {
  */
 GooglePlusAPI.prototype.init = function(callback) {
   this._getSession(true); // Always reset the cache if called.
+  this.refreshInfo();
   this._fireCallback(callback, this.isAuthenticated());
 };
 
@@ -1241,9 +1231,9 @@ GooglePlusAPI.prototype.newPost = function(callback, content) {
   }
 
   data[0] = content;
-  data[1] = "oz:" + this._userId + "." + new Date().getTime().toString(16) + ".0";
+  data[1] = "oz:" + this.getInfo().id + "." + new Date().getTime().toString(16) + ".0";
   data[6] = "[]";
-  data[8] = "{\"aclEntries\":[{\"scope\":{\"scopeType\":\"anyone\",\"name\":\"Anyone\",\"id\":\"anyone\",\"me\":true,\"requiresKey\":false},\"role\":20},{\"scope\":{\"scopeType\":\"anyone\",\"name\":\"Anyone\",\"id\":\"anyone\",\"me\":true,\"requiresKey\":false},\"role\":60}]}";
+  data[8] = this.getInfo().acl;
   data[9] = true;
   data[10] = [];
   data[11] = false;
