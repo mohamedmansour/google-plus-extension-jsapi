@@ -399,8 +399,14 @@ GooglePlusAPI.prototype.getDatabase = function() {
  */
 GooglePlusAPI.prototype.init = function(callback) {
   this._getSession(true); // Always reset the cache if called.
-  this.refreshInfo();
-  this._fireCallback(callback, this.isAuthenticated());
+  var self = this;
+  if(this.isAuthenticated()) {
+    this.refreshInfo(function() {
+        self._fireCallback(callback, true);
+    });
+  } else {
+    this._fireCallback(callback, false);
+  }
 };
 
 /**
@@ -1229,11 +1235,11 @@ GooglePlusAPI.prototype.newPost = function(callback, content) {
   for(var i = 0; i < data.length; i++) {
       data[i] = null;
   }
-
+  
   data[0] = content;
   data[1] = "oz:" + this.getInfo().id + "." + new Date().getTime().toString(16) + ".0";
   data[6] = "[]";
-  data[8] = this.getInfo().acl;
+  data[8] = JSON.parse(this.getInfo().acl);
   data[9] = true;
   data[10] = [];
   data[11] = false;
