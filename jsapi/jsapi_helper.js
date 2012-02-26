@@ -83,6 +83,19 @@ JSAPIHelper.firstDifference = function(a, b) {
 };
 
 /**
+ * Create an array of null items.
+ *
+ * @param {int} length The length of the array.
+ */
+JSAPIHelper.nullArray = function(length) {
+  var data = new Array(length);
+  for(var i = 0; i < length; i++) {
+      data[i] = null;
+  }
+  return data;
+};
+
+/**
  * Testing stuff ...
  */
 JSAPIHelper.assertEquals = function(expected, actual) {

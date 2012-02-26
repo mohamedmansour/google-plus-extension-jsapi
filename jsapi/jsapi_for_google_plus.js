@@ -380,26 +380,13 @@ GooglePlusAPI.prototype._isResponseSuccess = function(callback, response) {
 };
 
 /**
- * Create an array of null items.
- *
- * @param {int} length The length of the array.
- */
-GooglePlusAPI.prototype._nullArray = function(length) {
-  var data = new Array(length);
-  for(var i = 0; i < length; i++) {
-      data[i] = null;
-  }
-  return data;
-};
-
-/**
  * Create a base media item.
  * @param {Media} item A media item. (Media: .href, .mime, .type, .src, .mediaProvider(Optional))
 */
 GooglePlusAPI.prototype._createMediaBase = function(item) {
   var mediaDetails = [null,item.href,null,item.mime,item.type];
   
-  var mediaItem = this._nullArray(48);
+  var mediaItem = JSAPIHelper.nullArray(48);
   mediaItem[9] = [];
   mediaItem[24] = mediaDetails;
   mediaItem[41] = [[null,item.src,null,null],[null,item.src,null,null]];
@@ -445,7 +432,7 @@ GooglePlusAPI.prototype._createMediaImage = function(image) {
   
   mediaItem[5] = [null,image.src];
   
-  var imageDetails = this._nullArray(9);
+  var imageDetails = JSAPIHelper.nullArray(9);
   imageDetails[7] = image.width;
   imageDetails[8] = image.height;
   
@@ -1331,7 +1318,7 @@ GooglePlusAPI.prototype.newPost = function(callback, content, sharedPostId, medi
     }
   }
   
-  var data = this._nullArray(37);
+  var data = JSAPIHelper.nullArray(37);
   
   data[0] = content || '';
   data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
