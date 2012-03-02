@@ -999,14 +999,14 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   // buckets. It is like filling a tub of water with a cup, we keep pooring water
   // in the cup until we finished filling the tub up.
   var users = {};
-  var MAX_SLICE = 40;
+  var MAX_SLICE = 12;
   var indexSliced = 0;
   
   // Internal request.
   var doRequest = function() {
     var usersParam = allParams.slice(indexSliced, indexSliced + MAX_SLICE);
     if (usersParam.length == 0) {
-      self._fireCallback(callback, users);
+      self._fireCallback(callback, { status: true, data: users });
       return;
     }
     indexSliced += usersParam.length;
@@ -1014,17 +1014,23 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
     var params = '?n=6&m=[[' + usersParam.join(', ') + ']]';
     var data = 'at=' + self._getSession();
     self._requestService(function(response) {
-      var usersArr = response[1];
-      usersArr.forEach(function(element, i) {
-        var userObj = self._parseUser(element[1], true);
-        var user = userObj[0];
-        var circles = userObj[1];
-        users[user.id] = {
-          data: user,
-          circles: circles
-        };
-      });
-      doRequest();
+      if (!response || response.error) {
+        var error = 'Error during slice ' + indexSliced + '. ' + response.error + ' [' + response.text + ']'; 
+        self._fireCallback(callback, { status: false, data: error });
+      }
+      else {
+        var usersArr = response[1];
+        usersArr.forEach(function(element, i) {
+          var userObj = self._parseUser(element[1], true);
+          var user = userObj[0];
+          var circles = userObj[1];
+          users[user.id] = {
+            data: user,
+            circles: circles
+          };
+        });
+        doRequest();
+      }
     }, self.LOOKUP_API + params, data);
   };
   doRequest();

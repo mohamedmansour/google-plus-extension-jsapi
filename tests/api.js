@@ -70,11 +70,13 @@ $(document).ready(function() {
   });
 
   test('Lookup User Info', function() {
-    expect(7);
-    stop(2000);
+    expect(9);
+    stop(3000);
     var counter = 2;
     function done() { --counter || start(); }
-    plus.lookupUsers(function(data) {
+    plus.lookupUsers(function(resp) {
+      var data = resp.data;
+      ok(resp.status, 'Response valid');
       var user = data['116805285176805120365'];
       ok(user, 'User fetched ok');
       equals(user.data.name, 'Mohamed Mansour', 'My name');
@@ -82,7 +84,9 @@ $(document).ready(function() {
       done();
     }, '116805285176805120365', true);
     
-    plus.lookupUsers(function(data) {
+    plus.lookupUsers(function(resp) {
+      var data = resp.data;
+      ok(resp.status, 'Response valid');
       var userA = data['116805285176805120365'];
       var userB = data['117791034087176894458'];
       ok(userA, 'UserA fetched ok');
@@ -90,7 +94,11 @@ $(document).ready(function() {
       equals(userA.data.name, 'Mohamed Mansour', 'UserA name');
       equals(userB.data.name, 'John Barrington Craggs', 'UserB name');
       done();
-    }, ['116805285176805120365', '117791034087176894458']);
+    }, ['116805285176805120365', '117791034087176894458', '116805285176805120365', '116805285176805120365', '116805285176805120365',
+        '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365',
+        '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365',
+        '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365',
+        '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365', '116805285176805120365']);
   });
 
   test('Current User Info', function() {
