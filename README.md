@@ -43,6 +43,9 @@ Native Examples:
     // Create an instance of the API.
     var plus = new GooglePlusAPI();
 
+    // Initialize the API so we could get a new session if it exists we reuse it.
+    plus.init();
+
     // Refresh your circle information.
     plus.refreshCircles(function() {
 
@@ -57,7 +60,7 @@ Native Examples:
        });
        
        // Let us see who is in our circles but didn't add us to theirs.
-       plus.getDatabase().getPersonEntity().eagerFind({in_my_circle: 'Y', added_me: 'N'}, function(people) {
+       plus.getDatabase().getPersonEntity().find({in_my_circle: 'Y', added_me: 'N'}, function(people) {
          console.log(people);
        });
     });
