@@ -139,4 +139,24 @@ $(document).ready(function() {
     }, '116805285176805120365', 'MYcz4xJRvDr');
 
   });
+
+  test('Fetch link media', function() {
+    expect(6);
+    stop(2000);
+    var counter = 2;
+    function done() { --counter || start(); }
+    plus.fetchLinkMedia(function(res) {
+      equals(res.items[0][3], 'Is the internet down?', 'Title is as expected');
+      ok(res.items[0][21].match('Reload! Reload! Reload!'), 'Description is as expected');
+      equals(res.items[0][24][3], 'text/html', 'Mime type is as expected');
+      done();
+    }, 'http://istheinternetdown.com/');
+
+    plus.fetchLinkMedia(function(res) {
+      equals(res.items[0][3], 'Rick Astley - Never Gonna Give You Up', 'Title is as expected');
+      ok(res.items[0][21].match('Music video by Rick Astley'), 'Description is as expected');
+      equals(res.items[0][24][3], 'application/x-shockwave-flash', 'Mime type is as expected');
+      done();
+    }, 'http://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  });
 });
