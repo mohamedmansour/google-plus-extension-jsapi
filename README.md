@@ -136,6 +136,7 @@ Persistence:
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
 - `void reportProfile(Function:doneCallback, String:userId, opt_abuseReason)` - Report an abusive profile.
 - `void newPost(Function:doneCallback, String:content)` - Creates a new post on the stream.
+- `void fetchLinkMedia(Function:doneCallback(data), String:url` - Fetches media items describing a URL such as images, title and description.
 
 Read:
 
