@@ -91,6 +91,7 @@ GooglePlusAPI.prototype._parseURL = function(urlTemplate) {
  * @param {function(Object.<string, Object>)} callback
  * @param {string} urlTemplate The URL template to request.
  * @param {string} postData If specified, it will do a POST with the data.
+ * @return {XMLHttpRequest} The created XMLHttpRequest object.
  */
 GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postData) {
   var self = this;
@@ -126,6 +127,8 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
     async: true,
     complete: success
   });
+
+  return xhr;
 };
 
 /**
