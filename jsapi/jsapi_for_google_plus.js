@@ -1356,7 +1356,7 @@ GooglePlusAPI.prototype.fetchLinkMedia = function(callback, url) {
     return;
   }
   var self = this;
-  var params = "?c=" + url + "&t=1&slpf=0&ml=1";
+  var params = "?c=" + encodeURIComponent(url) + "&t=1&slpf=0&ml=1";
   var data = 'susp=false&at=' + this._getSession();
   this._requestService(function(response) {
     if (response.error) {
