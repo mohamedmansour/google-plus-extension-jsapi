@@ -1318,13 +1318,25 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
     }
   }
 
+  var scope = {
+    scopeType: 'anyone',
+    name: 'Anyone',
+    id: 'anyone',
+    me: true,
+    requiresKey: false};
+
+  var acl = {aclEntries: [
+    {scope: scope, role: 20},
+    {scope: scope, role: 60}
+  ]}
+
   var data = JSAPIHelper.nullArray(37);
 
   data[0] = content || '';
   data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
   data[2] = sharedPostId;
   data[6] = JSON.stringify(postObj.rawMedia || sMedia);
-  data[8] = JSON.parse(this.getInfo().acl);
+  data[8] = JSON.stringify(acl);
   data[9] = true;
   data[10] = [];
   data[11] = false;
