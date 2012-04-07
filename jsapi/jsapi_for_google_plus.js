@@ -57,6 +57,7 @@ GooglePlusAPI = function(opt) {
 };
 
 //------------------------ Private Functions --------------------------
+
 /**
  * Parse JSON string in a clean way by removing a bunch of commas and brackets. These should only
  * be used in Google post requests.
@@ -64,11 +65,16 @@ GooglePlusAPI = function(opt) {
  * @param {string} input The irregular JSON string to parse.
  */
 GooglePlusAPI.prototype._parseJSON = function(input) {
+  // We could use eval, but what if Google is untrustworthy?
+  //return eval('(' + input + ')');
+
   var jsonString = input.replace(/\[,/g, '[null,');
   jsonString = jsonString.replace(/,\]/g, ',null]');
   jsonString = jsonString.replace(/,,/g, ',null,');
   jsonString = jsonString.replace(/,,/g, ',null,');
+  jsonString = jsonString.replace(/{(\d+):/g, '{"$1":');
   return JSON.parse(jsonString);
+
 };
 
 /**
