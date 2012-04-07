@@ -195,7 +195,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
       item.data.active = isActive;
       item.data.id = hangoutID;
       item.data.participants = [];
-      item.data.extra_data = hangoutData[13];
+      item.data.extra_data = hangoutData[15];
       
       var cachedOnlineUsers = {};
       var onlineParticipants = hangoutData[3];
