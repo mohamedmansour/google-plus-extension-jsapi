@@ -50,7 +50,11 @@ GooglePlusAPI = function(opt) {
   this._session = null;
   this._info = null;
 
-  this.BURST_INTERVAL = 2000; // time between requesting 'more/burst' search results
+  // Time between requesting more pages in search resutls.
+  this.PRECACHE_INTERVAL = 1000;
+
+  // Time between requesting 'more/burst' search results.
+  this.BURST_INTERVAL = 5000;
 
 
   this._db.open();
@@ -1244,42 +1248,65 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   
   var doRequest = function(searchResults) {
     self._requestService(function(response) {
-      var errorExists = !response[1] || !response[1][1];
-      if (errorExists) {
-        self._fireCallback(callback, {
+      // Invalid response exists, it might mean we are doing a lot of searches
+      // or it might mean we have finished exhausting the realtime searching.
+      var invalidResponse = !response[1] || !response[1][1];
+      if (invalidResponse) {
+        // This might be an error, prepare the response so the consumer can
+        // deal with it.
+        var lastResponseObj = {
+          data: searchResults,
           status: false,
-          data: searchResults
-        });
-      } else {
-        var streamID = response[1][1][2]; // Not Used.
-        var trends = response[1][3]; // Not Used.
-        var dirtySearchResults = response[1][1][0][0];
-        processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
-        for (var i = 0; i < dirtySearchResults.length; i++) {
-          var item = self._parsePost(dirtySearchResults[i]);
-          searchResults.push(item);
+          mode: mode
         };
-        
-        // Page the results.
-        if (precache > 1) {
-          precache--;
-          doRequest(searchResults); // Recurse till we are done paging.
+        // If it is a real time update, it just means it has completed
+        // successfully, no more realtime queries needed.
+        // TODO: Perhaps we need to wake it up, not important at this time.
+        if (mode === 'rt') {
+          lastResponseObj.status = true;
+          console.warn('precache:' + precache + ':' + extra.precache,
+              'burst_size:' + burst_size + ':' + extra.burst_size, searchResults.length);
         }
         else {
-          self._fireCallback(callback, {
-            status: true,
-            data: searchResults,
-            mode: mode
-          });
-          // Decide whether to do bursts or not.
-          if (burst && 
-               (mode === 'rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
-            mode = 'rt';
-            if (--burst_size > 0) {
-                setTimeout(function() {
-                doRequest([]);
-              }.bind(this), self.BURST_INTERVAL);
-            }
+          lastResponseObj.status = false;
+          console.warn('precache:' + precache + ':' + extra.precache,
+              'burst_size:' + burst_size + ':' + extra.burst_size, searchResults.length);
+        }
+        self._fireCallback(callback, lastResponseObj);
+        return;
+      }
+
+      var streamID = response[1][1][2]; // Not Used.
+      var trends = response[1][3]; // Not Used.
+      var dirtySearchResults = response[1][1][0][0];
+      processedData = data.replace('$SESSION_ID', ',null,["' + streamID + '"]');
+      for (var i = 0; i < dirtySearchResults.length; i++) {
+        var item = self._parsePost(dirtySearchResults[i]);
+        searchResults.push(item);
+      };
+      
+      // Page the results.
+      if (precache > 1) {
+        precache--;
+        // Recurse till we are done paging.
+        setTimeout(function() {
+          doRequest(searchResults);
+        }.bind(this), self.PRECACHE_INTERVAL);
+      }
+      else {
+        self._fireCallback(callback, {
+          status: true,
+          data: searchResults,
+          mode: mode
+        });
+        // Decide whether to do bursts or not.
+        if (burst && 
+             (mode === 'rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
+          mode = 'rt';
+          if (--burst_size > 0) {
+            setTimeout(function() {
+              doRequest([]);
+            }.bind(this), self.BURST_INTERVAL);
           }
         }
       }
