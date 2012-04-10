@@ -510,10 +510,10 @@ GooglePlusAPI.prototype.init = function(callback) {
   var self = this;
   if(this.isAuthenticated()) {
     this.refreshInfo(function() {
-        self._fireCallback(callback, true);
+        self._fireCallback(callback, {status: true});
     });
   } else {
-    this._fireCallback(callback, false);
+    this._fireCallback(callback, {status: false});
   }
 };
 
@@ -533,7 +533,7 @@ GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
     var dirtyCircles = response[1];
     self._db.getCircleEntity().clear(function(res) {
       if (!res.status) {
-        self._fireCallback(callback, false);
+        self._fireCallback(callback, {status: false});
       }
       else {
         var dirtyUsers = response[2];
@@ -553,7 +553,7 @@ GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
         var remaining = onlyCircles ? batchRemaining[0] : batchRemaining[0] + batchRemaining[1];
         var onComplete = function(result) {
           if (--remaining == 0) {
-            self._fireCallback(callback, true);
+            self._fireCallback(callback, {status: true});
           }
         };
 
@@ -626,7 +626,7 @@ GooglePlusAPI.prototype.refreshFollowers = function(callback) {
     var remaining = dirtyFollowers.length;
     var onComplete = function(result) {
       if (--remaining == 0) {
-        self._fireCallback(callback, true);
+        self._fireCallback(callback, {status: true});
       }
     };
 
@@ -664,7 +664,7 @@ GooglePlusAPI.prototype.refreshFindPeople = function(callback) {
     var remaining = dirtyUsers.length;
     var onComplete = function(result) {
       if (--remaining == 0) {
-        self._fireCallback(callback, true);
+        self._fireCallback(callback, {status: true});
       }
     };
 
@@ -712,16 +712,14 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
       self._info.name = emailParse[1];
       self._info.email = emailParse[2];
       self._info.id = detail[0];
-      self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
+      // TODO: ACL was removes from this request.
+      //self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
       self._info.circles = detail[10][1].map(function(element) {
         return {id: element[0], name: element[1]}
       });
       break;
     }
-    self._fireCallback(callback, {
-      status: true,
-      data: self._info
-    });
+    self._fireCallback(callback, { status: true, data: self._info });
   }, this.INITIAL_DATA_API);
 };
 
@@ -749,7 +747,7 @@ GooglePlusAPI.prototype.addPeople = function(callback, circle, users) {
     var remaining = dirtyPeople.length;
     var onComplete = function(result) {
       if (--remaining == 0) {
-        self._fireCallback(callback, true);
+        self._fireCallback(callback, {status: true});
       }
     };
     dirtyPeople.forEach(function(element, index) {
@@ -787,7 +785,7 @@ GooglePlusAPI.prototype.removePeople = function(callback, circle, users) {
     var remaining = users.length;
     var onComplete = function(result) {
       if (--remaining == 0) {
-        self._fireCallback(callback, true);
+        self._fireCallback(callback, {status: true});
       }
     };
     users.forEach(function(element, index) {
@@ -888,7 +886,7 @@ GooglePlusAPI.prototype.sortCircle = function(callback, circle_id, index) {
   var requestParams = '?c=["' + circle_id + '"]&i=' + parseInt(index);
   var data = 'at=' + this._getSession();
   this._requestService(function(response) {
-    self._fireCallback(callback, true);
+    self._fireCallback(callback, {status: true});
   }, this.SORT_MUTATE_API + requestParams, data);
 };
 
@@ -927,11 +925,11 @@ GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
   }
   var self = this;
   if (!commentId) {
-    self._fireCallback(callback, false);
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: commentId'});
   }
   var data = 'commentId=' + commentId + '&at=' + this._getSession();
   this._requestService(function(response) {
-    self._fireCallback(callback, (!response.error));
+    self._fireCallback(callback, {status: !response.error});
   }, this.DELETE_COMMENT_API, data);
 };
 
@@ -947,13 +945,14 @@ GooglePlusAPI.prototype.getProfile = function(callback, id) {
   }
   var self = this;
   if (isNaN(id)) {
-    return {};
+    self._fireCallback(callback, {status: false, data: 'Invalid ID: Not a number'});
+    return;
   }
   this._requestService(function(response) {
     var obj = {
       introduction: response[1][2][14][1]
     };
-    self._fireCallback(callback, obj);
+    self._fireCallback(callback, {status: true, data: obj});
   }, this.PROFILE_GET_API + id);
 };
 
@@ -1098,7 +1097,7 @@ GooglePlusAPI.prototype.lookupPost = function(callback, userID, postID) {
   if (!userID || !postID) {
     this._fireCallback(callback, {
       status: false,
-      data: 'You must specifify a userID and postID parameters.'
+      data: 'Missing parameters: userID and postID'
     });
     return;
   }
@@ -1126,12 +1125,12 @@ GooglePlusAPI.prototype.modifyMute = function(callback, itemId, muteStatus) {
   }
   var self = this;
   if (!itemId) {
-    self._fireCallback(callback, false);
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: itemId'});
   }
   var mute = muteStatus || false;
   var data = 'itemId=' + itemId + '&mute=' + mute + '&at=' + this._getSession();
   this._requestService(function(response) {
-    self._fireCallback(callback, (!response.error));
+    self._fireCallback(callback, {status: !response.error});
   }, this.DELETE_COMMENT_API, data);
 };
 
@@ -1149,19 +1148,17 @@ GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
     return;
   }
   var self = this;
-  if (introduction) {
-    introduction = introduction.replace(/"/g, '\\"');
-  }
-  else {
-    introduction = 'null';
-  }
+  introduction = introduction ? introduction.replace(/"/g, '\\"') : 'null';
 
-  var acl = this.getInfo().acl;
+  var acl = JSON.stringify({aclEntries: [
+    {scope: scope, role: 20},
+    {scope: scope, role: 60}
+  ]});
   var data = 'profile=' + encodeURIComponent('[null,null,null,null,null,null,null,null,null,null,null,null,null,null,[[' +
       acl + ',null,null,null,[],1],"' + introduction + '"]]') + '&at=' + this._getSession();
 
   this._requestService(function(response) {
-    self._fireCallback(callback, response.error ? true : false);
+    self._fireCallback(callback, {status: !response.error});
   }, this.PROFILE_SAVE_API, data);
 };
 
@@ -1177,14 +1174,14 @@ GooglePlusAPI.prototype.reportProfile = function(callback, userId, opt_abuseReas
   }
   var self = this;
   if (!userId) {
-    self._fireCallback(callback, false);
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: userId'});
   }
 
   var reason = opt_abuseReason || GooglePlusAPI.AbuseReason.SPAM;
   var data = 'itemId=' + userId + '&userInfo=[1]&abuseReport=[' + reason +
       ']&at=' + this._getSession();
   this._requestService(function(response) {
-    self._fireCallback(callback, (!response.error));
+    self._fireCallback(callback, {status: !response.error});
   }, this.PROFILE_REPORT_API, data);
 };
 
@@ -1340,7 +1337,10 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
 
   var self = this;
   if (!content && !sharedPostId) {
-    self._fireCallback(callback, false);
+    self._fireCallback(callback, {
+      status: false,
+      data: 'Incomplete parameters: Must pass in content and sharedPostId'
+    });
   }
 
   var sMedia = [];
@@ -1386,7 +1386,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
       '&at=' + encodeURIComponent(this._getSession());
 
   this._requestService(function(response) {
-    self._fireCallback(callback, (!response.error));
+    self._fireCallback(callback, {status: !response.error});
   }, this.POST_API, params);
 };
 
@@ -1404,14 +1404,13 @@ GooglePlusAPI.prototype.fetchLinkMedia = function(callback, url) {
   var params = "?c=" + encodeURIComponent(url) + "&t=1&slpf=0&ml=1";
   var data = 'susp=false&at=' + this._getSession();
   this._requestService(function(response) {
-    if (response.error) {
-      self._fireCallback(callback, response);
+    if (!response.error) {
+      self._fireCallback(callback, {status: false, data: response});
     } else {
       // Response contains either a image/video single element at index 3, or an array of elements
       // describing a link at index 2. In any case, both of those indices are arrays of length >= 0.
       var items = response[2].concat(response[3]);
-      var result = {'items': items};
-      self._fireCallback(callback, result);
+      self._fireCallback(callback, {status: true, data: items});
     }
   }, this.LINK_DETAILS_API + params, data);
 };
