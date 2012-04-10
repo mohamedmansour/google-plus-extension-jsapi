@@ -527,7 +527,19 @@ GooglePlusAPI.prototype._parseAclItems = function(aclItems) {
         me: false,
         requiresKey: false
       };
+    } else if (aclItem.type == GooglePlusAPI.AclType.SPECIFIED_CIRCLE) {
+      scope = {
+        scopeType: 'focusGroup',
+        groupType: 'p',
+        // Against all common sense, Google+ also sends:
+        //   name: Circle's name
+        //   membershipCount: Number of circle members
+        id: selfId + '.' + aclItem.id,
+        me: false,
+        requiresKey: false
+      };
     }
+
     // No idea why, but each scope has to be sent twice: Once with role 20, once with role 60.
     resultAclEntries.push({scope: scope, role: 20});
     resultAclEntries.push({scope: scope, role: 60});
