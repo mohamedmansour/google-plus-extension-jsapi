@@ -538,6 +538,18 @@ GooglePlusAPI.prototype._parseAclItems = function(aclItems) {
         me: false,
         requiresKey: false
       };
+    } else if (aclItem.type == GooglePlusAPI.AclType.SPECIFIED_PERSON) {
+      scope = {
+        scopeType: 'user',
+        // Against all common sense, Google+ also sends:
+        //   iconUrl: Url to the avatar of the user.
+        // Even weirder than that - A post will fail with error 500 if the name string isn't set.
+        name: '',
+        id: aclItem.id,
+        me: false,
+        isMe: false,
+        requiresKey: false
+      };
     }
 
     // No idea why, but each scope has to be sent twice: Once with role 20, once with role 60.
