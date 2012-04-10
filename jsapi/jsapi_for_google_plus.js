@@ -1214,6 +1214,14 @@ GooglePlusAPI.SearchCategory = {};
 GooglePlusAPI.SearchCategory.BEST = 1;
 GooglePlusAPI.SearchCategory.RECENT = 2;
 
+// ACL type ENUM
+GooglePlusAPI.AclType = {};
+GooglePlusAPI.AclType.PUBLIC = 1;
+GooglePlusAPI.AclType.EXTENDED_CIRCLES = 2;
+GooglePlusAPI.AclType.YOUR_CIRCLES = 3;
+GooglePlusAPI.AclType.SPECIFIED_CIRCLE = 4;
+GooglePlusAPI.AclType.SPECIFIED_PERSON = 5;
+
 /**
  * Searches Google+ for everything.
  *
