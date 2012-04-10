@@ -487,6 +487,47 @@ GooglePlusAPI.prototype._createMediaItem = function(item) {
   return null;
 };
 
+/**
+ * Create a wire format ACL string.
+ *
+ * @param {AclItem<Array>} aclItems
+ * @return {Object}
+ *
+ * (AclItem: {GooglePlusAPI.ACL type, String id}, where id is a circle id for ACL.SPECIFIED_CIRCLE,
+ *     or a user's id for ACL.SPECIFIED_PERSON)
+ */
+GooglePlusAPI.prototype._parseAclItems = function(aclItems) {
+  var resultAclEntries = [];
+  aclItems.forEach(function(aclItem) {
+    var scope;
+    var selfId = this.getInfo().id;
+    if (aclItem.type == GooglePlusAPI.AclType.PUBLIC) {
+      scope = {
+        scopeType: 'anyone',
+        name: 'Anyone',
+        id: 'anyone',
+        me: true,
+        requiresKey: false
+      };
+    } else if (aclItem.type == GooglePlusAPI.AclType.EXTENDED_CIRCLES) {
+      scope = {
+        scopeType: 'focusGroup',
+        groupType: 'e',
+        name: 'Extended Circles',
+        id: selfId + '.1f',
+        me: false,
+        requiresKey: false
+      };
+    }
+
+    // No idea why, but each scope has to be sent twice: Once with role 20, once with role 60.
+    resultAclEntries.push({scope: scope, role: 20});
+    resultAclEntries.push({scope: scope, role: 60});
+  }.bind(this));
+  return {aclEntries: resultAclEntries};
+};
+
+
 //----------------------- Public Functions ------------------------.
 /**
  * @return True if session is valid to Google+.
@@ -1336,6 +1377,10 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
  *                            RawMedia[]:rawMedia - An array of raw media items in wire format.
  *                                                  This is the output format of fetchLinkMedia.
  *                                                  Overrides the media parameter when present.
+ *                            AclItem<Array>:aclItems - An array of acl items describing the
+ *                                                      audience of the post. See _parseAclItems
+ *                                                      for description.
+ *                                                      Defaults to [{type: PUBLIC}] if not present.
  */
 GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   if (!this._verifySession('newPost', arguments)) {
@@ -1359,17 +1404,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
     }
   }
 
-  var scope = {
-    scopeType: 'anyone',
-    name: 'Anyone',
-    id: 'anyone',
-    me: true,
-    requiresKey: false};
-
-  var acl = {aclEntries: [
-    {scope: scope, role: 20},
-    {scope: scope, role: 60}
-  ]}
+  var acl = this._parseAclItems(postObj.aclItems || [{type: GooglePlusAPI.AclType.PUBLIC}]);
 
   var data = JSAPIHelper.nullArray(37);
 
