@@ -1479,7 +1479,7 @@ GooglePlusAPI.prototype.fetchLinkMedia = function(callback, url) {
   var params = "?c=" + encodeURIComponent(url) + "&t=1&slpf=0&ml=1";
   var data = 'susp=false&at=' + this._getSession();
   this._requestService(function(response) {
-    if (!response.error) {
+    if (response.error) {
       self._fireCallback(callback, {status: false, data: response});
     } else {
       // Response contains either a image/video single element at index 3, or an array of elements
