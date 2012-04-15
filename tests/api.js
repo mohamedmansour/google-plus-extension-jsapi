@@ -140,7 +140,6 @@ $(document).ready(function() {
 
   });
 
-  /*
   test('Fetch link media', function() {
     expect(8);
     stop(2000);
@@ -164,5 +163,5 @@ $(document).ready(function() {
       done();
     }, 'http://www.youtube.com/watch?v=dQw4w9WgXcQ');
   });
-  */
+
 });
