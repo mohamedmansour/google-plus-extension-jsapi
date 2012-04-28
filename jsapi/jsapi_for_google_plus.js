@@ -164,13 +164,13 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   item.owner.id = element[16];
   item.owner.image = this._fixImage(element[18]);
 
-  if (element[43]) { // Share?
+  if (element[44]) { // Share?
     item.share = {};
-    item.share.name = element[43][0];
-    item.share.id = element[43][1];
-    item.share.image = this._fixImage(element[43][4]);
-    item.share.html = element[43][4];
-    item.share.url = this._buildProfileURLFromItem(element[43][4]);
+    item.share.name = element[44][0];
+    item.share.id = element[44][1];
+    item.share.image = this._fixImage(element[44][4]);
+    item.share.html = element[44][4];
+    item.share.url = this._buildProfileURLFromItem(element[44][4]);
     item.html = element[47];
   }
   else { // Normal
