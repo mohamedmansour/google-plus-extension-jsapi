@@ -1419,9 +1419,10 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   var content = postObj.content || null;
   var sharedPostId = postObj.share_id || null;
   var media = postObj.media || null;
+  var rawMedia = postObj.rawMedia;
 
   var self = this;
-  if (!content && !sharedPostId) {
+  if (!content && !sharedPostId && !media && !rawMedia) {
     self._fireCallback(callback, {
       status: false,
       data: 'Incomplete parameters: Must pass in content and sharedPostId'
@@ -1429,7 +1430,6 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   }
 
   var sMedia = [];
-  var rawMedia = postObj.rawMedia;
   if (media && !rawMedia) {
     for (var i in media) {
       sMedia.push(JSON.stringify(this._createMediaItem(media[i])));
