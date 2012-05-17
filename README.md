@@ -16,6 +16,8 @@ Who uses this API:
 
 ![](https://lh5.googleusercontent.com/0Amg5dBgOUZaNSOcZl9b6xUeQOVnpjOGZk9DkCZn975X_XzhsIVpe6lGhOJTMFEpczzm22uDWw=s32-h32-e365) Nuke Comments on Google+ https://chrome.google.com/webstore/detail/nfgaadooldinkdjpjbnbgnoaepmajdfh
 
+![](https://lh4.googleusercontent.com/SZ3-4hSckZj-fwuJICUIDk1E-eVwVYb6ZACVyFT9TokHbKJ_pGNS_b4-r6D4RSeKkS6_brzp0tE=s32-h32-e365) Do Share on Google+ https://chrome.google.com/webstore/detail/oglhhmnmdocfhmhlekfdecokagmbchnf
+
 Who made this:
 ---
 
