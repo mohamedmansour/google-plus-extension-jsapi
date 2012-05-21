@@ -127,6 +127,13 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
       callback(Array.isArray(results) ? results[0] : results);
     }
   };
+  var error = function(jqXHR, textStatus, errorThrown) {
+    callback({
+      error: errorThrown,
+      text: textStatus
+    });
+  };
+
   // TODO: This is the only jQuery part, try to convert it to plain old JavaScript so we could
   //       remove the dependency of using the jQuery library!
   var xhr = $.ajax({
@@ -135,7 +142,8 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
     data: postData || null,
     dataType: 'json',
     async: true,
-    complete: success
+    complete: success,
+    error: error
   });
 
   return xhr;
