@@ -16,6 +16,7 @@ MockEntity.prototype.find = function(select, where, callback) {callback({data: {
 MockEntity.prototype.findAll = function(callback) {callback({data: {}, status: true})};
 MockEntity.prototype.count = function(obj, callback) {callback({data: {}, status: true})};
 MockEntity.prototype.save = function(obj, callback) {callback({data: {}, status: true})};
+MockEntity.prototype.processStatementObject = function(sql, obj) { return sql; };
 
 /**
  * Represents a table entity.
@@ -28,8 +29,16 @@ AbstractEntity = function(db, name) {
   if (!db || !name) throw new Error('Invalid AbstractEntity: ' + db + ' - ' + name);
   this.db = db;
   this.name = name;
-  
+
   this.initialize();
+};
+
+/**
+ * Reserved words, that shouldn't be included as regular keys.
+ */
+AbstractEntity.RESERVED_KEYS = {
+  '_count': true,
+  '_orderby': true
 };
 
 /**
@@ -39,7 +48,7 @@ AbstractEntity = function(db, name) {
 AbstractEntity.prototype.tableDefinition = function() {};
 
 /**
- * 
+ *
  * @param {function(!Object)} callback The listener to call when completed.
  */
 AbstractEntity.prototype.initialize = function(callback) {
@@ -50,6 +59,13 @@ AbstractEntity.prototype.initialize = function(callback) {
   sql.push('_id INTEGER PRIMARY KEY AUTOINCREMENT');
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
+
+      // Catch errorness reserved keywords.
+      if (AbstractEntity.RESERVED_KEYS[key.toLowerCase()]) {
+        console.error('Reserved word collision', key);
+        continue;
+      }
+
       var val = obj[key];
       if (JSAPIHelper.isString(val)) {
         sql.push(key + ' ' + val);
@@ -73,7 +89,7 @@ AbstractEntity.prototype.initialize = function(callback) {
     tx.executeSql('CREATE TABLE IF NOT EXISTS ' + self.name + '(' + sql.join(',') + ')', [],
       function(tx, rs) {
         self.fireCallback({status: true, data: 'Success'}, callback);
-      }, 
+      },
       function(tx, e) {
         console.error(self.name, 'Initialize', e.message);
         self.fireCallback({status: false, data: 'Cannot create table'}, callback);
@@ -91,7 +107,7 @@ AbstractEntity.prototype.drop = function(callback) {
     tx.executeSql('DROP TABLE IF EXISTS ' + self.name, [],
       function(tx, rs) {
         self.fireCallback({status: true, data: 'Success'}, callback);
-      }, 
+      },
       function(tx, e) {
         console.error(self.name, 'Drop', e.message);
         self.fireCallback({status: false, data: 'Cannot drop table'}, callback);
@@ -118,7 +134,7 @@ AbstractEntity.prototype.getWhereObject = function(obj) {
   var keys = [];
   var values = [];
   for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (obj.hasOwnProperty(key) && !AbstractEntity.RESERVED_KEYS[key.toLowerCase()]) {
       keys.push(key + ' = ?');
       values.push(obj[key]);
     }
@@ -130,6 +146,48 @@ AbstractEntity.prototype.getWhereObject = function(obj) {
     keys: keys,
     values: values
   }
+};
+
+/**
+ * PRocess the statement Objects.
+ *
+ * @param {String} sql The Web SQL Query.
+ * @param {Object} obj The data that was passed in to query.
+ */
+AbstractEntity.prototype.processStatementObject = function(sql, obj) {
+  sql = this.appendOrderByObject(sql, obj);
+  sql = this.appendLimitObject(sql, obj);
+  return sql;
+};
+
+/**
+ * Appends the query with the ORDER By clause. This should be the last thing
+ * within a query.
+ *
+ * @param {String} sql The Web SQL Query.
+ * @param {Object} obj The data that was passed in to query.
+ */
+AbstractEntity.prototype.appendOrderByObject = function(sql, obj) {
+  if (!obj._orderBy || !Array.isArray(obj._orderBy) || sql.toUpperCase().indexOf(' ORDER BY ') != -1) {
+    return sql;
+  }
+
+  return sql + ' ORDER BY ' + obj._orderBy.join(', ');
+};
+
+/**
+ * Appends the query with the LIMIT clause. This should be the last thing
+ * within a query.
+ *
+ * @param {String} sql The Web SQL Query.
+ * @param {Object} obj The data that was passed in to query.
+ */
+AbstractEntity.prototype.appendLimitObject = function(sql, obj) {
+  if (!obj._count || isNaN(obj._count) || sql.toUpperCase().indexOf(' LIMIT ') != -1) {
+    return sql;
+  }
+
+  return sql + ' LIMIT 0, ' + parseInt(obj._count);
 };
 
 /**
@@ -185,7 +243,7 @@ AbstractEntity.prototype.create = function(obj, callback) {
       var keys = [];
       var values = [];
       for (var key in element) {
-        if (element.hasOwnProperty(key)) {
+        if (element.hasOwnProperty(key) && !AbstractEntity.RESERVED_KEYS[key.toLowerCase()]) {
           keys.push(key);
           values.push(element[key]);
           parameterized.push('?');
@@ -249,7 +307,7 @@ AbstractEntity.prototype.update = function(obj, callback) {
       var update = [];
       var data = [];
       for (var key in element) {
-        if (element.hasOwnProperty(key)) {
+        if (element.hasOwnProperty(key) && !AbstractEntity.RESERVED_KEYS[key.toLowerCase()]) {
           keyCount++;
           if (key != '_id') {
             update.push(key + ' = ?')
@@ -281,12 +339,13 @@ AbstractEntity.prototype.update = function(obj, callback) {
  *
  * @param {function(!Object)} callback The listener to call when completed.
  */
-AbstractEntity.prototype.find = function(select, where, callback) {
+AbstractEntity.prototype.find = function(select, obj, callback) {
   var self = this;
   var select = Array.isArray(select) ? select : ['*'];
-  var where = this.getWhereObject(where);
-  var sql = 'SELECT ' + select.join(',') + ' FROM ' + this.name +
-            ' WHERE ' + where.keys.join(' AND ');
+  var where = this.getWhereObject(obj);
+  var sql = this.processStatementObject('SELECT ' + select.join(',') + ' FROM ' + this.name +
+            ' WHERE ' + where.keys.join(' AND '), obj);
+
   this.log(sql);
 
   this.db.readTransaction(function(tx) {
