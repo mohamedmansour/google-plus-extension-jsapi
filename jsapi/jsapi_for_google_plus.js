@@ -1468,7 +1468,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   data[29] = false;
   data[36] = [];
 
-  var params = 'spar=' + encodeURIComponent(JSON.stringify(data)) +
+  var params = 'f.req=' + encodeURIComponent(JSON.stringify(data)) +
       '&at=' + encodeURIComponent(this._getSession());
 
   this._requestService(function(response) {
