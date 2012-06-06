@@ -1376,6 +1376,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
  *                                                      audience of the post. See _parseAclItems
  *                                                      for description.
  *                                                      Defaults to [{type: PUBLIC}] if not present.
+ *                            String[]:notify - An array of user IDs to be notified about this post.
  */
 GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   if (!this._verifySession('newPost', arguments)) {
@@ -1386,6 +1387,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   var sharedPostId = postObj.share_id || null;
   var media = postObj.media || null;
   var rawMedia = postObj.rawMedia;
+  var notify = postObj.notify || [];
 
   var self = this;
   if (!content && !sharedPostId && !media && !rawMedia) {
@@ -1411,7 +1413,9 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   data[2] = sharedPostId;
   data[6] = JSON.stringify(postObj.rawMedia || sMedia);
   data[9] = true;
-  data[10] = [];
+  data[10] = notify.map(function(userId) {
+    return [null, userId];
+  });
   data[11] = false;
   data[12] = false;
   data[14] = [];
