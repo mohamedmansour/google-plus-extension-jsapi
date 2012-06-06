@@ -508,66 +508,21 @@ GooglePlusAPI.prototype._createMediaItem = function(item) {
  *     or a user's id for ACL.SPECIFIED_PERSON)
  */
 GooglePlusAPI.prototype._parseAclItems = function(aclItems) {
-  var resultAclEntries = [];
-  aclItems.forEach(function(aclItem) {
-    var scope;
+  var resultAclEntries = aclItems.map(function(aclItem) {
     var selfId = this.getInfo().id;
     if (aclItem.type == GooglePlusAPI.AclType.PUBLIC) {
-      scope = {
-        scopeType: 'anyone',
-        name: 'Anyone',
-        id: 'anyone',
-        me: true,
-        requiresKey: false
-      };
+      return [null, null, 1];
     } else if (aclItem.type == GooglePlusAPI.AclType.EXTENDED_CIRCLES) {
-      scope = {
-        scopeType: 'focusGroup',
-        groupType: 'e',
-        name: 'Extended Circles',
-        id: selfId + '.1f',
-        me: false,
-        requiresKey: false
-      };
+      return [null, null, 4];
     } else if (aclItem.type == GooglePlusAPI.AclType.YOUR_CIRCLES) {
-      scope = {
-        scopeType: 'focusGroup',
-        groupType: 'a',
-        name: 'Your Circles',
-        id: selfId + '.1c',
-        me: false,
-        requiresKey: false
-      };
+      return [null, null, 3];
     } else if (aclItem.type == GooglePlusAPI.AclType.SPECIFIED_CIRCLE) {
-      scope = {
-        scopeType: 'focusGroup',
-        groupType: 'p',
-        // Against all common sense, Google+ also sends:
-        //   name: Circle's name
-        //   membershipCount: Number of circle members
-        id: selfId + '.' + aclItem.id,
-        me: false,
-        requiresKey: false
-      };
+      return [null, aclItem.id];
     } else if (aclItem.type == GooglePlusAPI.AclType.SPECIFIED_PERSON) {
-      scope = {
-        scopeType: 'user',
-        // Against all common sense, Google+ also sends:
-        //   iconUrl: Url to the avatar of the user.
-        // Even weirder than that - A post will fail with error 500 if the name string isn't set.
-        name: '',
-        id: aclItem.id,
-        me: false,
-        isMe: false,
-        requiresKey: false
-      };
+      return [[null, null, aclItem.id]];
     }
-
-    // No idea why, but each scope has to be sent twice: Once with role 20, once with role 60.
-    resultAclEntries.push({scope: scope, role: 20});
-    resultAclEntries.push({scope: scope, role: 60});
   }.bind(this));
-  return {aclEntries: resultAclEntries};
+  return [resultAclEntries];
 };
 
 
@@ -1421,6 +1376,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
  *                                                      audience of the post. See _parseAclItems
  *                                                      for description.
  *                                                      Defaults to [{type: PUBLIC}] if not present.
+ *                            String[]:notify - An array of user IDs to be notified about this post.
  */
 GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   if (!this._verifySession('newPost', arguments)) {
@@ -1431,6 +1387,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   var sharedPostId = postObj.share_id || null;
   var media = postObj.media || null;
   var rawMedia = postObj.rawMedia;
+  var notify = postObj.notify || [];
 
   var self = this;
   if (!content && !sharedPostId && !media && !rawMedia) {
@@ -1455,18 +1412,20 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   data[1] = 'oz:' + this.getInfo().id + '.' + new Date().getTime().toString(16) + '.0';
   data[2] = sharedPostId;
   data[6] = JSON.stringify(postObj.rawMedia || sMedia);
-  data[8] = JSON.stringify(acl);
   data[9] = true;
-  data[10] = [];
+  data[10] = notify.map(function(userId) {
+    return [null, userId];
+  });
   data[11] = false;
   data[12] = false;
   data[14] = [];
-  data[15] = false;
+  data[15] = null;
   data[16] = false;
   data[27] = false;
   data[28] = false;
   data[29] = false;
   data[36] = [];
+  data[37] = acl;
 
   var params = 'f.req=' + encodeURIComponent(JSON.stringify(data)) +
       '&at=' + encodeURIComponent(this._getSession());
