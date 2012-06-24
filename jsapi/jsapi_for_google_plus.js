@@ -44,8 +44,13 @@ GooglePlusAPI = function(opt) {
   
 	//------------------------ Private Fields --------------------------
   this._opt = opt || {};
-  this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB();
+  this._pageid = this._opt.pageid;
   this._googleid = this._opt.googleid || 0;
+  var dbPostfix = this._googleid + (this._pageid ? '_' + this._pageid : '');
+  if (dbPostfix == '0') {
+    dbPostfix = '';
+  }
+  this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB(dbPostfix);
 
   this._session = null;
   this._info = null;
