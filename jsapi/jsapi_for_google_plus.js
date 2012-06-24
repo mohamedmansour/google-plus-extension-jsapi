@@ -758,6 +758,7 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
       }
       self._info.name = detail[1][4][3];
       self._info.id = detail[0];
+      self._info.image_url = 'https:' + detail[1][3];
       // TODO: ACL was removes from this request.
       //self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
       self._info.circles = detail[10][1].map(function(element) {
