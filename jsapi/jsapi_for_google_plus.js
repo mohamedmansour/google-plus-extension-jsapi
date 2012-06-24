@@ -88,8 +88,8 @@ GooglePlusAPI.prototype._parseJSON = function(input) {
  */
 GooglePlusAPI.prototype._parseURL = function(urlTemplate) {
   var pagetoken = 'u/' + this._googleid;
-  if (this._pageid) { // TODO: Not Yet Supported!
-    pagetoken += '/b/' + this.pageid;
+  if (this._pageid) {
+    pagetoken += '/b/' + this._pageid;
   }
   return urlTemplate.replace(/\${pagetoken}/g, pagetoken);
 };
