@@ -13,11 +13,12 @@ MockDB.prototype.clearAll = function(callback) {};
  *
  * @constructor
  */
-PlusDB = function () {
+PlusDB = function (dbPostfix) {
   this.db = null;
   this.circleEntity = null;
   this.personEntity = null;
   this.personCircleEntity = null;
+  this.dbPostfix = dbPostfix || '';
 };
 
 /**
@@ -26,7 +27,7 @@ PlusDB = function () {
 PlusDB.prototype.open = function() {
   // 10MB should fit around 100K otherwise would take time to expand array.
   var db_size = 10 * 1024 * 1024;
-  this.db = openDatabase('Circle Management', '1.0', 'circle-manager', db_size);
+  this.db = openDatabase('Circle Management' + this.dbPostfix, '1.0', 'circle-manager', db_size);
   this.initializeEntities();
 };
 
