@@ -1468,6 +1468,31 @@ GooglePlusAPI.prototype.fetchLinkMedia = function(callback, url) {
   }, this.LINK_DETAILS_API + params, data);
 };
 
+/**
+ * Factory method, creates api instances for all user's identities, including pages.
+ *
+ * @param function(Object[]) callback
+ *
+ */
+GooglePlusAPI.prototype.getAllIdentitiesApis = function(callback) {
+  if (!this.isAuthenticated()) {
+    callback([]);
+  } else {
+    var result = [this];
+    var self = this;
+    this.getPages(function(response){
+      if (response.status) {
+        response.data.forEach(function(page) {
+          result.push(new GooglePlusAPI({
+            googleid: self._googleid,
+            pageid: page.id
+          }));
+        });
+      }
+      callback(result);
+    });
+  }
+}
 
 /**
  * @return {Object.<string, string>} The information from the user.
