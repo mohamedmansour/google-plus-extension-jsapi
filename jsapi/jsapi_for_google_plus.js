@@ -311,7 +311,7 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
   if (opt_reset || !this._session) {
     var xhr = $.ajax({
       type: 'GET',
-      url: 'https://plus.google.com',
+      url: this._parseURL('https://plus.google.com/${pagetoken}/'),
       data: null,
       async: false
     });
