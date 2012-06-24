@@ -746,10 +746,12 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
     // Just get the fist result of the Map.
     for (var i in responseMap) {
       var detail = responseMap[i];
-      var emailParse = detail[20].match(/(.+) <(.+)>/);
-      self._info.full_email = emailParse[0];
-      self._info.name = emailParse[1];
-      self._info.email = emailParse[2];
+      var emailParse = detail[20] && detail[20].match && detail[20].match(/(.+) <(.+)>/);
+      if (emailParse) {
+        self._info.full_email = emailParse[0];
+        self._info.email = emailParse[2];
+      }
+      self._info.name = detail[1][4][3];
       self._info.id = detail[0];
       // TODO: ACL was removes from this request.
       //self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
