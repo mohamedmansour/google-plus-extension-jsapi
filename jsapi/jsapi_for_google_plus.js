@@ -44,8 +44,13 @@ GooglePlusAPI = function(opt) {
   
 	//------------------------ Private Fields --------------------------
   this._opt = opt || {};
-  this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB();
+  this._pageid = this._opt.pageid;
   this._googleid = this._opt.googleid || 0;
+  var dbPostfix = this._googleid + (this._pageid ? '_' + this._pageid : '');
+  if (dbPostfix == '0') {
+    dbPostfix = '';
+  }
+  this._db = this._opt.use_mockdb ? new MockDB() : new PlusDB(dbPostfix);
 
   this._session = null;
   this._info = null;
@@ -88,8 +93,8 @@ GooglePlusAPI.prototype._parseJSON = function(input) {
  */
 GooglePlusAPI.prototype._parseURL = function(urlTemplate) {
   var pagetoken = 'u/' + this._googleid;
-  if (this._pageid) { // TODO: Not Yet Supported!
-    pagetoken += '/b/' + this.pageid;
+  if (this._pageid) {
+    pagetoken += '/b/' + this._pageid;
   }
   return urlTemplate.replace(/\${pagetoken}/g, pagetoken);
 };
@@ -306,7 +311,7 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
   if (opt_reset || !this._session) {
     var xhr = $.ajax({
       type: 'GET',
-      url: 'https://plus.google.com',
+      url: this._parseURL('https://plus.google.com/${pagetoken}/'),
       data: null,
       async: false
     });
@@ -746,11 +751,14 @@ GooglePlusAPI.prototype.refreshInfo = function(callback) {
     // Just get the fist result of the Map.
     for (var i in responseMap) {
       var detail = responseMap[i];
-      var emailParse = detail[20].match(/(.+) <(.+)>/);
-      self._info.full_email = emailParse[0];
-      self._info.name = emailParse[1];
-      self._info.email = emailParse[2];
+      var emailParse = detail[20] && detail[20].match && detail[20].match(/(.+) <(.+)>/);
+      if (emailParse) {
+        self._info.full_email = emailParse[0];
+        self._info.email = emailParse[2];
+      }
+      self._info.name = detail[1][4][3];
       self._info.id = detail[0];
+      self._info.image_url = 'https:' + detail[1][3];
       // TODO: ACL was removes from this request.
       //self._info.acl = '"' + (detail[1][14][0][0]).replace(/"/g, '\\"') + '"';
       self._info.circles = detail[10][1].map(function(element) {
@@ -1460,6 +1468,31 @@ GooglePlusAPI.prototype.fetchLinkMedia = function(callback, url) {
   }, this.LINK_DETAILS_API + params, data);
 };
 
+/**
+ * Factory method, creates api instances for all user's identities, including pages.
+ *
+ * @param function(Object[]) callback
+ *
+ */
+GooglePlusAPI.prototype.getAllIdentitiesApis = function(callback) {
+  if (!this.isAuthenticated()) {
+    callback([]);
+  } else {
+    var result = [this];
+    var self = this;
+    this.getPages(function(response){
+      if (response.status) {
+        response.data.forEach(function(page) {
+          result.push(new GooglePlusAPI({
+            googleid: self._googleid,
+            pageid: page.id
+          }));
+        });
+      }
+      callback(result);
+    });
+  }
+}
 
 /**
  * @return {Object.<string, string>} The information from the user.
