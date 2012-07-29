@@ -1108,7 +1108,7 @@ GooglePlusAPI.prototype.lookupActivities = function(callback, circleID) {
     return;
   }
   var self = this;
-  var params = '?sp=' + encodeURIComponent('[1,2,null,"' + circleID + '",null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]');
+  var params = '?f.req=' + encodeURIComponent('[[1,2,null,"' + circleID + '",null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]]');
   this._requestService(function(response) {
     var errorExists = !response[1];
     if (errorExists) {
