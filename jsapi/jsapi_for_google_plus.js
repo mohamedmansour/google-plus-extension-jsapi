@@ -1102,13 +1102,15 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
  * @param {function(data)} callback The response for the call, where
  *                                  the parameter is the data for the circles.
  * @param {string} circleID The ID of the circle.
+ * @param {string} personID The ID of the person (only used if circleID is not provided).
  */
-GooglePlusAPI.prototype.lookupActivities = function(callback, circleID) {
+GooglePlusAPI.prototype.lookupActivities = function(callback, circleID, personID) {
   if (!this._verifySession('lookupActivities', arguments)) {
     return;
   }
   var self = this;
-  var params = '?f.req=' + encodeURIComponent('[[1,2,null,"' + circleID + '",null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]]');
+  var personCirclePair = (circleID ? 'null,"' + circleID + '"' : '"' + personID + '",null');
+  var params = '?f.req=' + encodeURIComponent('[[1,2,' + personCirclePair + ',null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]]');
   this._requestService(function(response) {
     var errorExists = !response[1];
     if (errorExists) {
