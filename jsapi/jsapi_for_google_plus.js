@@ -1097,18 +1097,23 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
 };
 
 /**
- * Lookups the activities for the circle.
+ * Lookups the activities for the circle or person.
  *
  * @param {function(data)} callback The response for the call, where
- *                                  the parameter is the data for the circles.
+ *                                  the parameter is the data for the activities.
  * @param {string} circleID The ID of the circle.
+ * @param {string} personID The ID of the person (only used if circleID is not provided).
+ * @param {string} pageToken A token recieved in a previous call. A call with this token will fetch
+ *                           the next page of activities.
  */
-GooglePlusAPI.prototype.lookupActivities = function(callback, circleID) {
+GooglePlusAPI.prototype.lookupActivities = function(callback, circleID, personID, pageToken) {
   if (!this._verifySession('lookupActivities', arguments)) {
     return;
   }
   var self = this;
-  var params = '?sp=' + encodeURIComponent('[1,2,null,"' + circleID + '",null,null,null,"social.google.com",[],null,null,null,null,null,null,[]]');
+  pageToken = pageToken || 'null';
+  var personCirclePair = (circleID ? 'null,"' + circleID + '"' : '"' + personID + '",null');
+  var params = '?f.req=' + encodeURIComponent('[[1,2,' + personCirclePair + ',null,null,null,"social.google.com",[],null,null,null,null,null,null,[]],' + pageToken + ']');
   this._requestService(function(response) {
     var errorExists = !response[1];
     if (errorExists) {
@@ -1125,7 +1130,8 @@ GooglePlusAPI.prototype.lookupActivities = function(callback, circleID) {
       }
       self._fireCallback(callback, {
         status: true,
-        data: cleanPosts
+        data: cleanPosts,
+        pageToken: response[1][1]
       });
     }
   }, this.ACTIVITIES_API + params);

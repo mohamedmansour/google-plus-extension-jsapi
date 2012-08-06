@@ -158,7 +158,7 @@ Read:
 - `void search(Function(data):callback, String:query, Object:{category, precache, burst, burst_size})`
 - `void lookupUsers(Function(data):callback, Array<String:googleProfileID>)`
 - `void lookupPost(Function(data):callback, String:googleProfileID, String:postProfileID)`
-- `void lookupActivities(Function(data):callback, String:circleID)`
+- `void lookupActivities(Function(data):callback, String:circleID, String:personID, String:pageToken)`
 - `void getPages(Function(data):callback)`
 
 Private Members (only for internal API):
