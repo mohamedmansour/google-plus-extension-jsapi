@@ -326,7 +326,7 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
     // freezes the entire browser. For now, we will just discover it since
     // indexOf doesn't freeze while search/match/exec freezes.
     var isLogged = false;
-    var searchForString = ',"https://www.google.com/csi","';
+    var searchForString = ',"https://csi.gstatic.com/csi","';
     var responseText = xhr.responseText;
     if (responseText != null) {
       var startIndex = responseText.indexOf(searchForString);
