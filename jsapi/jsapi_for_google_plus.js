@@ -973,6 +973,7 @@ GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
   var self = this;
   if (!commentId) {
     self._fireCallback(callback, {status: false, data: 'Missing parameter: commentId'});
+    return;
   }
   var data = 'commentId=' + commentId + '&at=' + this._getSession();
   this._requestService(function(response) {
@@ -1179,6 +1180,7 @@ GooglePlusAPI.prototype.modifyMute = function(callback, itemId, muteStatus) {
   var self = this;
   if (!itemId) {
     self._fireCallback(callback, {status: false, data: 'Missing parameter: itemId'});
+    return;
   }
   var mute = muteStatus || false;
   var data = 'itemId=' + itemId + '&mute=' + mute + '&at=' + this._getSession();
@@ -1228,6 +1230,7 @@ GooglePlusAPI.prototype.reportProfile = function(callback, userId, opt_abuseReas
   var self = this;
   if (!userId) {
     self._fireCallback(callback, {status: false, data: 'Missing parameter: userId'});
+    return;
   }
 
   var reason = opt_abuseReason || GooglePlusAPI.AbuseReason.SPAM;
@@ -1409,6 +1412,7 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
       status: false,
       data: 'Incomplete parameters: Must pass in content and sharedPostId'
     });
+    return;
   }
 
   var sMedia = [];
