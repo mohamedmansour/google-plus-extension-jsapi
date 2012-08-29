@@ -122,25 +122,23 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
   
   // When the XHR was successfull, do some post processing to clean up the data.
   var success = function(data, textStatus, jqXHR) {
-    if (data.status != 200) {
-      callback({
-        error: data.status,
-        text: data.statusText
-      });
-    }
-    else {
+    if (data.status == 200) {
       var text = data.responseText;
       var uglyResults = data.responseText.substring(4);
       var results = self._parseJSON(uglyResults);
       callback(Array.isArray(results) ? results[0] : results);
     }
   };
+
   var error = function(jqXHR, textStatus, errorThrown) {
     if (textStatus == "parsererror") {
+      if (jqXHR.status == 200) {
+        success(jqXHR, textStatus, jqXHR);
+      }
       return;
     }
     callback({
-      error: errorThrown,
+      error: errorThrown || jqXHR.status || 'error',
       text: textStatus
     });
   };
@@ -153,7 +151,7 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
     data: postData || null,
     dataType: 'json',
     async: true,
-    complete: success,
+    success: success,
     error: error
   });
 
