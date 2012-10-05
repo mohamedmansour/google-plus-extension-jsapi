@@ -17,6 +17,7 @@ GooglePlusAPI = function(opt) {
   this.DELETE_MUTATE_API       = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/delete/';
   this.SORT_MUTATE_API         = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/sortorder/';
   this.BLOCK_MUTATE_API        = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/block_user/';
+  this.COMMENT_API             = 'https://plus.google.com/${pagetoken}/_/stream/comment/';
   this.DELETE_COMMENT_API      = 'https://plus.google.com/${pagetoken}/_/stream/deletecomment/';
   this.INITIAL_DATA_API        = 'https://plus.google.com/${pagetoken}/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/${pagetoken}/_/profiles/get/';
@@ -959,6 +960,39 @@ GooglePlusAPI.prototype.modifyBlocked = function(callback, users, opt_block) {
   this._requestService(function(response) {
     self._fireCallback(callback, (!response.error));
   }, this.BLOCK_MUTATE_API, data);
+};
+
+/**
+ * Adds a comment.
+ * @param {function(Object)} callback
+ * @param {string} postId The post onto which the comment should be added.
+ * @param {string} content The comment to be added.
+ */
+GooglePlusAPI.prototype.addComment = function(callback, postId, content) {
+  if (!this._verifySession('addComment', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!postId) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: postId'});
+    return;
+  }
+  if (!content) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: content'});
+    return;
+  }
+  var data = 'f.req=' + JSON.stringify([
+    postId,
+    'os:' + postId + ':' + new Date().getTime(),
+    content,
+    new Date().getTime(),
+    null,
+    null,
+    1
+  ]) + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, {status: !response.error});
+  }, this.COMMENT_API + '?rt=j', data);
 };
 
 /**
