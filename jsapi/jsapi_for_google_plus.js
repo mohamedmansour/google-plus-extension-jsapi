@@ -29,6 +29,7 @@ GooglePlusAPI = function(opt) {
   this.ACTIVITIES_API          = 'https://plus.google.com/${pagetoken}/_/stream/getactivities/';
   this.MUTE_ACTIVITY_API       = 'https://plus.google.com/${pagetoken}/_/stream/muteactivity/';
   this.LOCK_POST_API           = 'https://plus.google.com/${pagetoken}/_/stream/disableshare/';
+  this.DISABLE_COMMENTS_API    = 'https://plus.google.com/${pagetoken}/_/stream/disablecomments/';
   this.POST_API                = 'https://plus.google.com/${pagetoken}/_/sharebox/post/?spam=20&rt=j';
   this.LINK_DETAILS_API        = 'https://plus.google.com/${pagetoken}/_/sharebox/linkpreview/';
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
@@ -1245,6 +1246,28 @@ GooglePlusAPI.prototype.modifyLockPost = function(callback, postId, toLock) {
   this._requestService(function(response) {
     self._fireCallback(callback, {status: !response.error});
   }, this.LOCK_POST_API, data);
+};
+
+/**
+ * Disables comments on the post.
+ *
+ * @param {function(Object)} callback
+ * @param {string} postId The id of the post to modify.
+ * @param {boolean} toDisable When true, the post will be closed for comments.
+ */
+GooglePlusAPI.prototype.modifyDisableComments = function(callback, postId, toDisable) {
+  if (!this._verifySession('modifyDisableComments', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!postId) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: postId'});
+    return;
+  }
+  var data = 'itemId=' + postId + '&disable=' + !!toDisable + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, {status: !response.error});
+  }, this.DISABLE_COMMENTS_API, data);
 };
 
 /**

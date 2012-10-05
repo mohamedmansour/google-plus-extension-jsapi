@@ -137,6 +137,7 @@ Persistence:
 - `void modifyBlocked(Function:doneCallback, Array<String>:usersToModify, boolean:opt_block)` - Modify the blocked state of people. Allows blocking and unblocking.
 - `void modifyMute(Function:doneCallback, String:activityID, Boolean:muteStatus)` - Sets the mute status for a specific item.
 - `void modifyLockPost(Function:doneCallback, String:activityID, Boolean:toLock)` - Sets the mute status for a specific item.
+- `void modifyDisableComments(Function:doneCallback, String:activityID, Boolean:toDisable)` - Sets the mute status for a specific item.
 - `void addComment(Function:doneCallback, String: postId, String: content)` - Adds a comment.
 - `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
