@@ -22,7 +22,7 @@ Who made this:
 ---
 
 - Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
-- Tzafrir Rehan (Contributed reportProfile, deleteComment, modifyBlocked) - https://plus.google.com/115470071077898720170/posts
+- Tzafrir Rehan (Contributer) - https://plus.google.com/115470071077898720170/posts
 - Jingqin Lynn (Contributed newPost) - https://plus.google.com/117239089659078825668/posts
 - Ryan Peggs (Contributed Bug fixes) - https://plus.google.com/117544701105016054892/posts
 
