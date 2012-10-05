@@ -28,6 +28,7 @@ GooglePlusAPI = function(opt) {
   this.ACTIVITY_API            = 'https://plus.google.com/${pagetoken}/_/stream/getactivity/';
   this.ACTIVITIES_API          = 'https://plus.google.com/${pagetoken}/_/stream/getactivities/';
   this.MUTE_ACTIVITY_API       = 'https://plus.google.com/${pagetoken}/_/stream/muteactivity/';
+  this.LOCK_POST_API           = 'https://plus.google.com/${pagetoken}/_/stream/disableshare/';
   this.POST_API                = 'https://plus.google.com/${pagetoken}/_/sharebox/post/?spam=20&rt=j';
   this.LINK_DETAILS_API        = 'https://plus.google.com/${pagetoken}/_/sharebox/linkpreview/';
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
@@ -1221,6 +1222,29 @@ GooglePlusAPI.prototype.modifyMute = function(callback, itemId, muteStatus) {
   this._requestService(function(response) {
     self._fireCallback(callback, {status: !response.error});
   }, this.DELETE_COMMENT_API, data);
+};
+
+/**
+ * Locks the post (A locked post cannot be reshared).
+ *
+ * @param {function(Object)} callback
+ * @param {string} postId The id of the post to be locked.
+ * @param {boolean} toLock When true, the post will be locked, when false, the post
+ *                         will be unlocked.
+ */
+GooglePlusAPI.prototype.modifyLockPost = function(callback, postId, toLock) {
+  if (!this._verifySession('modifyLockPost', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!postId) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: postId'});
+    return;
+  }
+  var data = 'itemId=' + postId + '&disable=' + !!toLock + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, {status: !response.error});
+  }, this.LOCK_POST_API, data);
 };
 
 /**
