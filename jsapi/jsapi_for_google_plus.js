@@ -1379,7 +1379,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
 };
 
 /**
- * Creates a new Google+ Public post on the existing users stream.
+ * Creates a new Google+ post on the existing users stream.
  *
  * @param {function(Object)} callback The post has been shared.
  * @param {Object} postObj the object that we are about to post that contains:
