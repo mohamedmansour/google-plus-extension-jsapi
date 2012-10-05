@@ -1449,7 +1449,20 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
       '&at=' + encodeURIComponent(this._getSession());
 
   this._requestService(function(response) {
-    self._fireCallback(callback, {status: !response.error});
+    if (response.error) {
+      self._fireCallback(callback, {status: false});
+      return;
+    }
+
+    var postData = response[1][1][0][0];
+    var data = {
+      id: postData[8],
+      content: postData[14],
+      htmlContent: postData[4],
+      url: 'https://plus.google.com/' + postData[21]
+    };
+
+    self._fireCallback(callback, {status: true, data: data});
   }, this.POST_API, params);
 };
 
