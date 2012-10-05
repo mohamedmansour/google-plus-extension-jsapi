@@ -967,7 +967,7 @@ GooglePlusAPI.prototype.modifyBlocked = function(callback, users, opt_block) {
  * @param {string} commentId The comment id.
  */
 GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
-  if (!this._verifySession('commentId', arguments)) {
+  if (!this._verifySession('deleteComment', arguments)) {
     return;
   }
   var self = this;
