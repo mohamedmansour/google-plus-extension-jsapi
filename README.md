@@ -21,10 +21,13 @@ Who uses this API:
 Who made this:
 ---
 
-- Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
-- Tzafrir Rehan (Contributer) - https://plus.google.com/115470071077898720170/posts
-- Jingqin Lynn (Contributed newPost) - https://plus.google.com/117239089659078825668/posts
-- Ryan Peggs (Contributed Bug fixes) - https://plus.google.com/117544701105016054892/posts
+Core Contributors
+- Mohamed Mansour (Maintainer, Core Dev), - https://github.com/mohamedmansour
+- Tzafrir Rehan (Core Dev) - https://github.com/tzafrir
+
+Contributors
+- Jingqin Lynn (Contributed newPost) 
+- Ryan Peggs (Contributed Bug fixes) 
 
 
 What is it about:
