@@ -174,6 +174,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   }
 
   item.url = this._buildProfileURLFromItem(element[21]);
+  item.id = element[8];
   item.is_public = (element[32] == '1');
   
   item.owner = {};
@@ -190,6 +191,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
     item.share.image = this._fixImage(element[44][4]);
     item.share.html = element[44][4];
     item.share.url = this._buildProfileURLFromItem(element[44][4]);
+    item.share.original_content = element[4];
     item.html = element[47];
   }
   else { // Normal
