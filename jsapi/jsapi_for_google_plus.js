@@ -988,7 +988,7 @@ GooglePlusAPI.prototype.addComment = function(callback, postId, content) {
   var data = 'f.req=' + JSON.stringify([
     postId,
     'os:' + postId + ':' + new Date().getTime(),
-    content,
+    encodeURI(content),
     new Date().getTime(),
     null,
     null,
