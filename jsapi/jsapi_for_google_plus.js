@@ -30,6 +30,7 @@ GooglePlusAPI = function(opt) {
   this.MUTE_ACTIVITY_API       = 'https://plus.google.com/${pagetoken}/_/stream/muteactivity/';
   this.LOCK_POST_API           = 'https://plus.google.com/${pagetoken}/_/stream/disableshare/';
   this.DISABLE_COMMENTS_API    = 'https://plus.google.com/${pagetoken}/_/stream/disablecomments/';
+  this.COMMENT_API             = 'https://plus.google.com/${pagetoken}/_/stream/comment/';
   this.POST_API                = 'https://plus.google.com/${pagetoken}/_/sharebox/post/?spam=20&rt=j';
   this.LINK_DETAILS_API        = 'https://plus.google.com/${pagetoken}/_/sharebox/linkpreview/';
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
@@ -42,7 +43,6 @@ GooglePlusAPI = function(opt) {
   this.INVITES_API             = 'https://plus.google.com/u/0/_/socialgraph/get/num_invites_remaining/';
   this.PROFILE_PHOTOS_API      = 'https://plus.google.com/u/0/_/profiles/getprofilepagephotos/116805285176805120365';
   this.PLUS_API                = 'https://plus.google.com/u/0/_/plusone';
-  this.COMMENT_API             = 'https://plus.google.com/u/0/_/stream/comment/';
   this.MEMBER_SUGGESTION_API   = 'https://plus.google.com/u/0/_/socialgraph/lookup/circle_member_suggestions/'; // s=[[[null, null, "116805285176805120365"]]]&at=
   
 	//------------------------ Private Fields --------------------------
