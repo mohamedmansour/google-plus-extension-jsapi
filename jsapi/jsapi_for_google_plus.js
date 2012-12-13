@@ -1539,6 +1539,9 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
  *                                                      audience of the post. See _parseAclItems
  *                                                      for description.
  *                                                      Defaults to [{type: PUBLIC}] if not present.
+ *                            [String, String]:community - A pair of Community ID, Category ID,
+ *                                                         describing a community to post to. This
+ *                                                         overrides any items in aclItems if present.
  *                            String[]:notify - An array of user IDs to be notified about this post.
  */
 GooglePlusAPI.prototype.newPost = function(callback, postObj) {
@@ -1588,8 +1591,8 @@ GooglePlusAPI.prototype.newPost = function(callback, postObj) {
   data[27] = false;
   data[28] = false;
   data[29] = false;
-  data[36] = [];
-  data[37] = acl;
+  data[36] = postObj.community ? [postObj.community] : [];
+  data[37] = postObj.community ? [[[null,null,null,[postObj.community[0]]]]] : acl;
 
   var params = 'f.req=' + encodeURIComponent(JSON.stringify(data)) +
       '&at=' + encodeURIComponent(this._getSession());
