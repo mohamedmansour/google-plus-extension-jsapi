@@ -166,6 +166,7 @@ Read:
 - `void lookupPost(Function(data):callback, String:googleProfileID, String:postProfileID)`
 - `void lookupActivities(Function(data):callback, String:circleID, String:personID, String:pageToken)`
 - `void getPages(Function(data):callback)`
+- `void getCommunities(Function(data):callback)`
 
 Private Members (only for internal API):
 

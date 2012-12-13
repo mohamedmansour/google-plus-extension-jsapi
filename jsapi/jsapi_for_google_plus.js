@@ -34,6 +34,7 @@ GooglePlusAPI = function(opt) {
   this.POST_API                = 'https://plus.google.com/${pagetoken}/_/sharebox/post/?spam=20&rt=j';
   this.LINK_DETAILS_API        = 'https://plus.google.com/${pagetoken}/_/sharebox/linkpreview/';
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
+  this.COMMUNITIES_API         = 'https://plus.google.com/${pagetoken}/_/communities/getcommunities';
 
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -1017,6 +1018,34 @@ GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
   this._requestService(function(response) {
     self._fireCallback(callback, {status: !response.error});
   }, this.DELETE_COMMENT_API, data);
+};
+
+/**
+ * Gets all communities for the signed in user.
+ */
+GooglePlusAPI.prototype.getCommunities = function(callback) {
+  if (!this._verifySession('getCommunities', arguments)) {
+    return;
+  }
+  var data = 'f.req=[[]]&at=' + this._getSession();
+  var self = this;
+  this._requestService(function(response) {
+    var responseData = response[1] && response[1][0];
+    if (response.error || !responseData) {
+      self._fireCallback(callback, {status: false, error: response.error});
+      return;
+    }
+    self._fireCallback(callback, {status: true, data: responseData.map(function(comm) {
+      return {
+        id: comm[0][0],
+        name: comm[0][1][0],
+        tagLine: comm[0][1][1],
+        description: comm[0][1][8],
+        photoUrl: 'http:' + comm[0][1][3],
+        numMembers: comm[3][0]
+      };
+    })});
+  }, this.COMMUNITIES_API, data);
 };
 
 /**
