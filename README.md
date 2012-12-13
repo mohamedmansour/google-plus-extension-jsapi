@@ -167,6 +167,7 @@ Read:
 - `void lookupActivities(Function(data):callback, String:circleID, String:personID, String:pageToken)`
 - `void getPages(Function(data):callback)`
 - `void getCommunities(Function(data):callback)`
+- `void getCommunity(Function(data):callback, String:communityId)`
 
 Private Members (only for internal API):
 

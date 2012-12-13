@@ -35,6 +35,7 @@ GooglePlusAPI = function(opt) {
   this.LINK_DETAILS_API        = 'https://plus.google.com/${pagetoken}/_/sharebox/linkpreview/';
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
   this.COMMUNITIES_API         = 'https://plus.google.com/${pagetoken}/_/communities/getcommunities';
+  this.COMMUNITY_API           = 'https://plus.google.com/${pagetoken}/_/communities/getcommunity';
 
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -1022,6 +1023,8 @@ GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
 
 /**
  * Gets all communities for the signed in user.
+ *
+ * @param {function(Object)} callback
  */
 GooglePlusAPI.prototype.getCommunities = function(callback) {
   if (!this._verifySession('getCommunities', arguments)) {
@@ -1046,6 +1049,37 @@ GooglePlusAPI.prototype.getCommunities = function(callback) {
       };
     })});
   }, this.COMMUNITIES_API, data);
+};
+
+/**
+ * Gets all categories for a community.
+ *
+ * @param {function(Object)} callback
+ * @param {string} communityId The community ID to fetch categories for.
+ */
+GooglePlusAPI.prototype.getCommunity = function(callback, communityId) {
+  if (!this._verifySession('getCommunities', arguments)) {
+    return;
+  }
+  if (!communityId) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: communityId'});
+    return;
+  }
+  var self = this;
+  var data = 'f.req=["' + communityId + '", false]&at=' + this._getSession();
+  this._requestService(function(response) {
+    var categories = response[1] && response[1][2] && response[1][2][0];
+    if (response.error || !categories) {
+      self._fireCallback(callback, {status: false, error: response.error});
+      return;
+    }
+    self._fireCallback(callback, {status: true, data: categories.map(function(category) {
+      return {
+        id: category[0],
+        name: category[1]
+      };
+    })});
+  }, this.COMMUNITY_API, data);
 };
 
 /**
