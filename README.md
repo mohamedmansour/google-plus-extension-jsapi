@@ -143,6 +143,7 @@ Persistence:
 - `void modifyDisableComments(Function:doneCallback, String:activityID, Boolean:toDisable)` - Sets the mute status for a specific item.
 - `void addComment(Function:doneCallback, String: postId, String: content)` - Adds a comment.
 - `void deleteComment(Function:doneCallback, String:commentId)` - Deleting a comment.
+- `void deleteActivity(Function:doneCallback, String:activityId)` - Deleting a post.
 - `void saveProfile(Function:doneCallback, String:introduction)` - Save a new introduction.
 - `void reportProfile(Function:doneCallback, String:userId, opt_abuseReason)` - Report an abusive profile.
 - `void newPost(Function:doneCallback, String:content)` - Creates a new post on the stream.

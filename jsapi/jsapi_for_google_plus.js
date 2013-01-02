@@ -19,6 +19,7 @@ GooglePlusAPI = function(opt) {
   this.BLOCK_MUTATE_API        = 'https://plus.google.com/${pagetoken}/_/socialgraph/mutate/block_user/';
   this.COMMENT_API             = 'https://plus.google.com/${pagetoken}/_/stream/comment/';
   this.DELETE_COMMENT_API      = 'https://plus.google.com/${pagetoken}/_/stream/deletecomment/';
+  this.DELETE_ACTIVITY_API     = 'https://plus.google.com/${pagetoken}/_/stream/deleteactivity/';
   this.INITIAL_DATA_API        = 'https://plus.google.com/${pagetoken}/_/initialdata?key=14';
   this.PROFILE_GET_API         = 'https://plus.google.com/${pagetoken}/_/profiles/get/';
   this.PROFILE_SAVE_API        = 'https://plus.google.com/${pagetoken}/_/profiles/save?_reqid=0';
@@ -1019,6 +1020,26 @@ GooglePlusAPI.prototype.deleteComment = function(callback, commentId) {
   this._requestService(function(response) {
     self._fireCallback(callback, {status: !response.error});
   }, this.DELETE_COMMENT_API, data);
+};
+
+/**
+ * Deletes a post.
+ * @param {function(Object)} callback
+ * @param {string} activityId The post's id.
+ */
+GooglePlusAPI.prototype.deleteActivity = function(callback, activityId) {
+  if (!this._verifySession('deleteActivity', arguments)) {
+    return;
+  }
+  var self = this;
+  if (!activityId) {
+    self._fireCallback(callback, {status: false, data: 'Missing parameter: activityId'});
+    return;
+  }
+  var data = 'itemId=' + activityId + '&at=' + this._getSession();
+  this._requestService(function(response) {
+    self._fireCallback(callback, {status: !response.error});
+  }, this.DELETE_ACTIVITY_API, data);
 };
 
 /**
