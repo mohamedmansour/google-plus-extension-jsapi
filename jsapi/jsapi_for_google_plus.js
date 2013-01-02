@@ -185,6 +185,8 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   item.owner.id = element[16];
   item.owner.image = this._fixImage(element[18]);
 
+  item.num_comments = element[93];
+
   item.raw_media = element[11];
 
   if (element[44]) { // Share?
