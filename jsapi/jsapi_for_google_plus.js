@@ -1144,7 +1144,7 @@ GooglePlusAPI.prototype.getPages = function(callback) {
   this._requestService(function(response) {
     var dirtyPages = response[1];
     var cleanPages = [];
-    if (dirtyPages && dirtyPages.length > 0) {
+    if (dirtyPages && dirtyPages.length) {
       dirtyPages.forEach(function(element, i) {
         var page = {};
         page.url =  element[2];
@@ -1192,7 +1192,7 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   // Internal request.
   var doRequest = function() {
     var usersParam = allParams.slice(indexSliced, indexSliced + MAX_SLICE);
-    if (usersParam.length == 0) {
+    if (usersParam.length === 0) {
       self._fireCallback(callback, { status: true, data: users });
       return;
     }
@@ -1534,7 +1534,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         });
         // Decide whether to do bursts or not.
         if (burst &&
-             (mode === 'rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
+             (mode === 'rt' || searchResults.length)){  // Bursts cannot start if there are initially no results
           mode = 'rt';
           if (--burst_size > 0) {
             setTimeout(function() {
@@ -1551,7 +1551,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
     self._requestService(function(response) {
       var hashTags = [];
 
-      if (response[1] && response[1].length > 0) {
+      if (response[1] && response[1].length) {
         response[1].forEach(function(elt) {
           hashTags.push(elt[0]);
         });
