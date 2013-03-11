@@ -26,8 +26,8 @@ Core Contributors
 - Tzafrir Rehan (Core Dev) - https://github.com/tzafrir
 
 Contributors
-- Jingqin Lynn (Contributed newPost) 
-- Ryan Peggs (Contributed Bug fixes) 
+- Jingqin Lynn (Contributed newPost)
+- Ryan Peggs (Contributed Bug fixes)
 
 
 What is it about:
@@ -65,13 +65,13 @@ Native Examples:
        plus.getPeopleInMyCircles(function(people) {
          console.log(people);
        });
-       
+
        // Let us see who is in our circles but didn't add us to theirs.
        plus.getDatabase().getPersonEntity().find({in_my_circle: 'Y', added_me: 'N'}, function(people) {
          console.log(people);
        });
     });
-    
+
 As you see, it is pretty easy to query everything. The possibilities are inifinite
 since the data is backed up in a WebSQL DataStore, so querying, reporting, etc, would
 be super quick.
@@ -87,6 +87,28 @@ message as follows:
       });
     });
 
+
+Another example, lets say we want to search for a hash tag:
+
+    // Initialize the Google Plus API Wrapper.
+    var api = new GooglePlusAPI();
+
+    // Lets initialize it so we can get the current logged in users session.
+    api.init();
+
+    // Search for the API. You have the following enums to choose from for searching:
+    //
+    //   GooglePlusAPI.SearchType.EVERYTHING
+    //   GooglePlusAPI.SearchType.PEOPLE_PAGES;
+    //   GooglePlusAPI.SearchType.POSTS
+    //   GooglePlusAPI.SearchType.SPARKS
+    //   GooglePlusAPI.SearchType.HANGOUTS
+    //   GooglePlusAPI.SearchType.HASHTAGS
+    //
+    // So lets search for hashtags that have Microsoft inside them.
+    api.search(function(resp) {
+      console.log("Hash results for Microsoft: " + resp.data.join(", "));
+    }, "microsoft", { type: GooglePlusAPI.SearchType.HASHTAGS });
 
 A full blown example will be released by the end of this week showing how powerful this could be.
 As you already know, I am creating a simple circle management utility so you can manage your circles.
@@ -121,7 +143,7 @@ Native querying:
 
 - `PlusDB getDatabase()` - Returns the native Database to do advanced queries
 
-Initialization, fill up the database: 
+Initialization, fill up the database:
 
 - `void init(Function:doneCallback)` - Initializes session and data, you can call it at app start.
 - `void refreshCircles(Function:doneCallback, boolean:opt_onlyCircles)` - Queries G+ Service for all circles and people information.

@@ -1,6 +1,7 @@
 {
   "name": "Google+ Unofficial API Demo",
   "version": "0.0.1",
+  "manifest_version": 2,
   "description": "Testing Google+ API",
   "icons": {
     "16": "img/icon16.png",
@@ -8,14 +9,25 @@
     "48": "img/icon48.png",
     "128": "img/icon128.png"
   },
-  "permissions": [ 
-    "unlimitedStorage", 
+  "permissions": [
+    "unlimitedStorage",
     "https://plus.google.com/*"
   ],
-  "background_page": "background.html",
+  "background": {
+    "scripts": [
+      "/libs/jquery-1.6.3.min.js",
+      "/jsapi/jsapi_helper.js",
+      "/jsapi/jsapi_abstract_database.js",
+      "/jsapi/jsapi_database.js",
+      "/jsapi/jsapi_for_google_plus.js",
+      "/content_script_api_bridge.js",
+      "/settings.js",
+      "/background_controller.js"
+    ]
+  },
   "browser_action": {
-    "default_icon": "img/icon32.png", 
-    "default_title": "API Test Runner", 
-    "default_popup": "tests/api.html"  
+    "default_icon": "img/icon32.png",
+    "default_title": "API Test Runner",
+    "default_popup": "tests/api.html"
   }
 }

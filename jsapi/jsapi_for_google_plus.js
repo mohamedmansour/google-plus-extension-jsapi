@@ -37,6 +37,7 @@ GooglePlusAPI = function(opt) {
   this.PAGES_API               = 'https://plus.google.com/${pagetoken}/_/pages/get/';
   this.COMMUNITIES_API         = 'https://plus.google.com/${pagetoken}/_/communities/getcommunities';
   this.COMMUNITY_API           = 'https://plus.google.com/${pagetoken}/_/communities/getcommunity';
+  this.HASHTAGS_API            = 'https://plus.google.com/complete/search?hjson=t&client=es-hashtags&q=';
 
   // Not Yet Implemented API
   this.CIRCLE_ACTIVITIES_API   = 'https://plus.google.com/u/0/_/stream/getactivities/'; // ?sp=[1,2,null,"7f2150328d791ede",null,null,null,"social.google.com",[]]
@@ -47,7 +48,7 @@ GooglePlusAPI = function(opt) {
   this.PROFILE_PHOTOS_API      = 'https://plus.google.com/u/0/_/profiles/getprofilepagephotos/116805285176805120365';
   this.PLUS_API                = 'https://plus.google.com/u/0/_/plusone';
   this.MEMBER_SUGGESTION_API   = 'https://plus.google.com/u/0/_/socialgraph/lookup/circle_member_suggestions/'; // s=[[[null, null, "116805285176805120365"]]]&at=
-  
+
 	//------------------------ Private Fields --------------------------
   this._opt = opt || {};
   this._pageid = this._opt.pageid;
@@ -120,23 +121,26 @@ GooglePlusAPI.prototype._requestService = function(callback, urlTemplate, postDa
     callback({error: true, text: 'URL to request is missing.'});
     return;
   }
-  
+
   var url = this._parseURL(urlTemplate);
-  
+
   // When the XHR was successfull, do some post processing to clean up the data.
   var success = function(data, textStatus, jqXHR) {
-    if (data.status == 200) {
-      var text = data.responseText;
-      var uglyResults = data.responseText.substring(4);
+    if (!data && jqXHR.status === 200) {
+      var text = jqXHR.responseText;
+      var uglyResults = text.substring(4);
       var results = self._parseJSON(uglyResults);
       callback(Array.isArray(results) ? results[0] : results);
+    }
+    else if (data && jqXHR.status === 200) {
+      callback(data);
     }
   };
 
   var error = function(jqXHR, textStatus, errorThrown) {
     if (textStatus == "parsererror") {
-      if (jqXHR.status == 200) {
-        success(jqXHR, textStatus, jqXHR);
+      if (jqXHR.status === 200) {
+        success(null, textStatus, jqXHR);
       }
       return;
     }
@@ -179,7 +183,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
   item.url = this._buildProfileURLFromItem(element[21]);
   item.id = element[8];
   item.is_public = (element[32] == '1');
-  
+
   item.owner = {};
   item.owner.name = element[3];
   item.owner.id = element[16];
@@ -224,7 +228,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
       item.data.id = hangoutID;
       item.data.participants = [];
       item.data.extra_data = hangoutData[15];
-      
+
       var cachedOnlineUsers = {};
       var onlineParticipants = hangoutData[3];
       for (var i in onlineParticipants) {
@@ -243,7 +247,7 @@ GooglePlusAPI.prototype._parsePost = function(element) {
       }
     }
   }
-  
+
   return item;
 };
 
@@ -341,7 +345,7 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
       if (startIndex != -1) {
         var remainingText = responseText.substring(startIndex + searchForString.length);
         var foundSession = remainingText.substring(0, remainingText.indexOf('"'));
-      
+
         // Validates it.
         if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
           this._session = foundSession;
@@ -406,7 +410,7 @@ GooglePlusAPI.prototype._fixImage = function(image) {
 
 /**
  * Verify the session is valid if not, log it and fire the callback quickly.
- * 
+ *
  * Every caller must return if false.
  */
 GooglePlusAPI.prototype._verifySession = function(name, args) {
@@ -441,13 +445,13 @@ GooglePlusAPI.prototype._isResponseSuccess = function(callback, response) {
 */
 GooglePlusAPI.prototype._createMediaBase = function(item) {
   var mediaDetails = [null,item.href,null,item.mime,item.type];
-  
+
   var mediaItem = JSAPIHelper.nullArray(48);
   mediaItem[9] = [];
   mediaItem[24] = mediaDetails;
   mediaItem[41] = [[null,item.src,null,null],[null,item.src,null,null]];
   mediaItem[47] = [[null,item.mediaProvider || "","http://google.com/profiles/media/provider",""]];
-  
+
   return mediaItem;
 };
 
@@ -466,12 +470,12 @@ GooglePlusAPI.prototype._createMediaDocument = function(doc) {
     }
     doc.src = doc.domain ? ("//s2.googleusercontent.com/s2/favicons?domain=" + doc.domain) : null;
   }
-  
+
   var mediaItem = this._createMediaBase(doc);
-  
+
   mediaItem[3] = doc.title || doc.href;
   mediaItem[21] = doc.content || "";
-  
+
   return mediaItem;
 };
 
@@ -485,15 +489,15 @@ GooglePlusAPI.prototype._createMediaImage = function(image) {
   image.href = image.href || image.src;
   image.src = image.src || image.href;
   var mediaItem = this._createMediaBase(image);
-  
+
   mediaItem[5] = [null,image.src];
-  
+
   var imageDetails = JSAPIHelper.nullArray(9);
   imageDetails[7] = image.width;
   imageDetails[8] = image.height;
-  
+
   mediaItem[24] = mediaItem[24].concat(imageDetails);
-  
+
   return mediaItem;
 };
 
@@ -578,7 +582,7 @@ GooglePlusAPI.prototype.refreshCircles = function(callback, opt_onlyCircles) {
   if (!this._verifySession('refreshCircles', arguments)) {
     return;
   }
-  
+
   var self = this;
   var onlyCircles = opt_onlyCircles || false;
   this._requestService(function(response) {
@@ -1176,7 +1180,7 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   ids.forEach(function(element, i) {
      allParams.push('[null,null,"' + element + '"]');
   });
-  
+
   // We are just limited to the number of requests. In this case, we will create
   // 40 items in each bucket slice. Then keep doing requests until we finish our
   // buckets. It is like filling a tub of water with a cup, we keep pooring water
@@ -1184,7 +1188,7 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
   var users = {};
   var MAX_SLICE = 12;
   var indexSliced = 0;
-  
+
   // Internal request.
   var doRequest = function() {
     var usersParam = allParams.slice(indexSliced, indexSliced + MAX_SLICE);
@@ -1198,7 +1202,7 @@ GooglePlusAPI.prototype.lookupUsers = function(callback, ids) {
     var data = 'at=' + self._getSession();
     self._requestService(function(response) {
       if (!response || response.error) {
-        var error = 'Error during slice ' + indexSliced + '. ' + response.error + ' [' + response.text + ']'; 
+        var error = 'Error during slice ' + indexSliced + '. ' + response.error + ' [' + response.text + ']';
         self._fireCallback(callback, { status: false, data: error });
       }
       else {
@@ -1263,7 +1267,7 @@ GooglePlusAPI.prototype.lookupActivities = function(callback, circleID, personID
 
 /**
  * Queries the postID for the specific user.
- 
+
  * @param {function(boolean)} callback
  * @param {string} userID The profile ID
  * @param {string} postID The post ID
@@ -1362,7 +1366,7 @@ GooglePlusAPI.prototype.modifyDisableComments = function(callback, postId, toDis
  * TODO: complete this for the entire profile. This will just persist the introduction portion
  *       not everything else. It is pretty neat how Google is doing this side. kudos.
  *
- * @param {function(boolean)} callback      
+ * @param {function(boolean)} callback
  * @param {string} introduction The content.
  */
 GooglePlusAPI.prototype.saveProfile = function(callback, introduction) {
@@ -1422,6 +1426,7 @@ GooglePlusAPI.SearchType.PEOPLE_PAGES = 2;
 GooglePlusAPI.SearchType.POSTS = 3;
 GooglePlusAPI.SearchType.SPARKS = 4;
 GooglePlusAPI.SearchType.HANGOUTS = 5;
+GooglePlusAPI.SearchType.HASHTAGS = 6;
 
 // Search Privacy ENUM
 GooglePlusAPI.SearchPrivacy = {};
@@ -1469,11 +1474,11 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
   var burst_size = extra.burst_size || 8;
   var mode = 'query';
   query = query.replace(/"/g, '\\"'); // Escape only quotes for now.
-  
+
   var data = 'srchrp=[["' + query + '",' + type + ',' + category + ',[' + privacy +']' +
              ']$SESSION_ID]&at=' + this._getSession();
   var processedData = data.replace('$SESSION_ID', '');
-  
+
   var doRequest = function(searchResults) {
     self._requestService(function(response) {
       // Invalid response exists, it might mean we are doing a lot of searches
@@ -1512,7 +1517,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
         var item = self._parsePost(dirtySearchResults[i]);
         searchResults.push(item);
       };
-      
+
       // Page the results.
       if (precache > 1) {
         precache--;
@@ -1528,7 +1533,7 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
           mode: mode
         });
         // Decide whether to do bursts or not.
-        if (burst && 
+        if (burst &&
              (mode === 'rt' || searchResults.length>0)){  // Bursts cannot start if there are initially no results
           mode = 'rt';
           if (--burst_size > 0) {
@@ -1540,9 +1545,35 @@ GooglePlusAPI.prototype.search = function(callback, query, opt_extra) {
       }
     }, self.QUERY_API + mode, processedData);
   };
-  
-  var searchResults = [];
-  doRequest(searchResults); // Initiate.
+
+  var doHashTagRequest = function(query) {
+    var hashQueryUrl = self.HASHTAGS_API + encodeURIComponent(query);
+    self._requestService(function(response) {
+      var hashTags = [];
+
+      if (response[1] && response[1].length > 0) {
+        response[1].forEach(function(elt) {
+          hashTags.push(elt[0]);
+        });
+      }
+
+      self._fireCallback(callback, {
+        status: true,
+        mode: mode,
+        data: hashTags
+      });
+
+    }, hashQueryUrl);
+  };
+
+
+  if (type === GooglePlusAPI.SearchType.HASHTAGS) {
+    doHashTagRequest(query);
+  }
+  else {
+    var searchResults = [];
+    doRequest(searchResults); // Initiate.
+  }
 };
 
 /**
