@@ -1057,15 +1057,16 @@ GooglePlusAPI.prototype.getCommunities = function(callback) {
   if (!this._verifySession('getCommunities', arguments)) {
     return;
   }
-  var data = 'f.req=[[]]&at=' + this._getSession();
+  var data = 'f.req=[[1]]&at=' + this._getSession();
   var self = this;
   this._requestService(function(response) {
-    var responseData = response[1] && response[1][0];
+    var responseData = response[1] && response[1][2];
     if (response.error || !responseData) {
       self._fireCallback(callback, {status: false, error: response.error});
       return;
     }
     self._fireCallback(callback, {status: true, data: responseData.map(function(comm) {
+      comm = comm[0];
       return {
         id: comm[0][0],
         name: comm[0][1][0],
@@ -1075,7 +1076,7 @@ GooglePlusAPI.prototype.getCommunities = function(callback) {
         numMembers: comm[3][0]
       };
     })});
-  }, this.COMMUNITIES_API, data);
+  }, this.COMMUNITIES_API + '?rt=j', data);
 };
 
 /**
