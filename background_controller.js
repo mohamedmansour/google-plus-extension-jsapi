@@ -82,3 +82,6 @@ BackgroundController.prototype.onExternalRequest = function(request, sender, sen
     sendResponse({});
   }
 };
+
+var backgroundController = new BackgroundController();
+backgroundController.init();
