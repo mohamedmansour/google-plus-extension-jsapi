@@ -350,8 +350,8 @@ GooglePlusAPI.prototype._getSession = function(opt_reset) {
 
         // Validates it.
         if (foundSession.match(/((?:[a-zA-Z0-9]+_?)+:[0-9]+)/)) {
-          this._session = foundSession;
-          isLogged = true;
+          var xhr2 = $.ajax({  //Get current user's id            type: 'GET',            url: 'https://plus.google.com/u/0/_/initialdata?key=14',            data: null,            async: false          });                                              var position = xhr2.responseText.indexOf('14\\\":');          var userId = xhr2.responseText.substring(position+8, position+29);	             var xhr3 = $.ajax({ //Get details for the current user            type: 'GET',            url: 'https://plus.google.com/u/0/_/profiles/get/' + userId,            data: null,                         async: false          });          var searchForString3 = '/me/createprofile/';	  	  var presence = xhr3.responseText.indexOf(searchForString3); //Check for the presence of the redirect code that indicates that the user has no profile.	  if (presence != -1) {	    console.error('The current user has no public profile, visit https://plus.google.com/up/accounts/upgrade/ to create one');          } else {            this._session = foundSession;            isLogged = true;
+          }    
         }
       }
     }
